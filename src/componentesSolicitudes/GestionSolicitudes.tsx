@@ -16,7 +16,9 @@ const GestionSolicitudes: React.FC = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [error, setError] = useState<string>("");
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
-  const [filtroTipo, setFiltroTipo] = useState<string | null>(null);
+  const [ordenFecha, setOrdenFecha] = useState<"asc" | "desc" | null>(null);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const solicitudesPorPagina = 10; // Número de elementos por página
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,6 +60,39 @@ const GestionSolicitudes: React.FC = () => {
     obtenerSolicitudes();
   }, []);
 
+  const filtrarSolicitudes = (): Solicitud[] => {
+    let filtradas = solicitudes;
+
+    if (filtroEstado) {
+      filtradas = filtradas.filter((solicitud) => solicitud.estado === filtroEstado);
+    }
+
+    if (ordenFecha) {
+      filtradas = filtradas.sort((a, b) =>
+        ordenFecha === "asc"
+          ? new Date(a.fechaSolicitud).getTime() - new Date(b.fechaSolicitud).getTime()
+          : new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime()
+      );
+    }
+
+    return filtradas;
+  };
+
+  const solicitudesFiltradas = filtrarSolicitudes();
+
+  const indiceUltimaSolicitud = paginaActual * solicitudesPorPagina;
+  const indicePrimeraSolicitud = indiceUltimaSolicitud - solicitudesPorPagina;
+  const solicitudesPaginadas = solicitudesFiltradas.slice(
+    indicePrimeraSolicitud,
+    indiceUltimaSolicitud
+  );
+
+  const totalPaginas = Math.ceil(solicitudesFiltradas.length / solicitudesPorPagina);
+
+  const cambiarPagina = (numero: number) => {
+    setPaginaActual(numero);
+  };
+
   const aceptarSolicitud = (id: number) => navigate(`/aprobar-solicitud/${id}`);
   const rechazarSolicitud = (id: number) => navigate(`/rechazar-solicitud/${id}`);
   const eliminarSolicitud = async (id: number) => {
@@ -98,14 +133,6 @@ const GestionSolicitudes: React.FC = () => {
     }
   };
 
-  const filtrarSolicitudes = (): Solicitud[] => {
-    return solicitudes.filter((solicitud) => {
-      const coincideEstado = filtroEstado ? solicitud.estado === filtroEstado : true;
-      const coincideTipo = filtroTipo ? solicitud.tipoSolicitud === filtroTipo : true;
-      return coincideEstado && coincideTipo;
-    });
-  };
-
   return (
     <div className="container mt-4">
       <h2 className="text-center mb-4">Gestión de Solicitudes</h2>
@@ -127,17 +154,15 @@ const GestionSolicitudes: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="form-label">Filtrar por Tipo:</label>
+          <label className="form-label">Ordenar por Fecha:</label>
           <select
             className="form-select"
-            value={filtroTipo || ""}
-            onChange={(e) => setFiltroTipo(e.target.value || null)}
+            value={ordenFecha || ""}
+            onChange={(e) => setOrdenFecha(e.target.value as "asc" | "desc" | null)}
           >
-            <option value="">Todos</option>
-            <option value="Área Solicitante">Área Solicitante</option>
-            <option value="Usuario Solicitante">Usuario Solicitante</option>
-            <option value="Mas recientes">Mas recientes</option>
-            <option value="Mas antiguas">Mas antiguas</option>
+            <option value="">Sin orden</option>
+            <option value="asc">Más antiguas primero</option>
+            <option value="desc">Más recientes primero</option>
           </select>
         </div>
       </div>
@@ -157,7 +182,7 @@ const GestionSolicitudes: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {filtrarSolicitudes().map((solicitud) => (
+          {solicitudesPaginadas.map((solicitud) => (
             <tr key={solicitud.id}>
               <td>{solicitud.id}</td>
               <td>{solicitud.numeroDeSerie}</td>
@@ -193,11 +218,22 @@ const GestionSolicitudes: React.FC = () => {
                   Imprimir
                 </button>
               </td>
-
             </tr>
           ))}
         </tbody>
       </table>
+
+      <div className="d-flex justify-content-center mt-3">
+        {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((numero) => (
+          <button
+            key={numero}
+            className={`btn me-2 ${paginaActual === numero ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => cambiarPagina(numero)}
+          >
+            {numero}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
