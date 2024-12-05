@@ -35,6 +35,10 @@ const Login: React.FC = () => {
         // Si el login es exitoso, verificamos el rol
         const usuario = data.obj; // Asumiendo que la respuesta tiene el usuario con su rol
         localStorage.setItem("usuario", usuario.nombreUsuario); // Guardamos el usuario en localStorage
+        localStorage.setItem("areaId", usuario.areaId); // Guardamos el areaId en localStorage
+        localStorage.setItem("rol", usuario.rol); // Guardamos el rol en localStorage
+        localStorage.setItem("idUsuario", usuario.id); // Guardamos el id del usuario en localStorage
+
 
         if (usuario.rol === "Admin") {
           setSuccessMessage("Bienvenido, Admin!"); // Mensaje de éxito para Admin
@@ -48,7 +52,7 @@ const Login: React.FC = () => {
         setError(data.mensaje || "Credenciales incorrectas, intenta de nuevo.");
       }
     } catch (error: any) {
-      setError("No se pudo conectar con el servidor. Intenta más tarde.");
+      setError("El usuario no existe en la base de datos.");
     } finally {
       setIsLoading(false);
     }

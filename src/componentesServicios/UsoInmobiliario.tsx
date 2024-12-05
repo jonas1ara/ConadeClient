@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SolicitudServicioPostal: React.FC = () => {
+const SolicitudUsoInmobiliario: React.FC = () => {
   const navigate = useNavigate();
 
   const [numeroDeSolicitud, setNumeroDeSolicitud] = useState<string>("");
   const [fechaSolicitud, setFechaSolicitud] = useState<string>(new Date().toISOString().split("T")[0]);
   const [areaSolicitante, setAreaSolicitante] = useState<string>("");
-  const [usuarioSolicitante, setUsuarioSolicitante] = useState<string>("");
   const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
-  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Servicio Postal"); // Añadido
-  const [tipoServicio, setTipoServicio] = useState<string>("");
-  const [descripcionServicio, setDescripcionServicio] = useState<string>("");
+  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Uso Inmobiliario"); 
+  const [sala, setSala] = useState<string>("");
+  const [fechaInicio, setFechaInicio] = useState<string>("");
+  const [fechaFin, setFechaFin] = useState<string>("");
+  const [horarioInicio, setHorarioInicio] = useState<string>("");
+  const [horarioFin, setHorarioFin] = useState<string>("");
   const [estado, setEstado] = useState<string>("Solicitada");
   const [observaciones, setObservaciones] = useState<string>("");
-  const [fechaEnvio, setFechaEnvio] = useState<string>("");
-  const [fechaRecepcionMaxima, setFechaRecepcionMaxima] = useState<string>("");
+  const [descripcion, setDescripcion] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
 
@@ -31,9 +32,6 @@ const SolicitudServicioPostal: React.FC = () => {
       console.error("usuarioId no encontrado en localStorage");
     }
   }, []);
-
-
-
 
   // Generar número de solicitud (simulación)
   useEffect(() => {
@@ -69,26 +67,32 @@ const SolicitudServicioPostal: React.FC = () => {
       case "areaSolicitante":
         setAreaSolicitante(value);
         break;
-      case "tipoServicio":
-        setTipoServicio(value);
+      case "tipoSolitud":
+        setTipoSolicitud(value);
         break;
-      case "descripcionServicio":
-        setDescripcionServicio(value);
+      case "sala":
+        setSala(value);
+        break;
+      case "fechaInicio":
+        setFechaInicio(value);
+        break;
+      case "fechaFin":
+        setFechaFin(value);
+        break;
+      case "horarioInicio":
+        setHorarioInicio(value);
+        break;
+      case "horarioFin":
+        setHorarioFin(value);
+        break;
+      case "descripcion":
+        setDescripcion(value);
         break;
       case "estado":
         setEstado(value);
         break;
       case "observaciones":
         setObservaciones(value);
-        break;
-      case "fechaEnvio":
-        setFechaEnvio(value);
-        break;
-      case "fechaRecepcionMaxima":
-        setFechaRecepcionMaxima(value);
-        break;
-      case "tipoSolicitud": // Manejo de tipoSolicitud
-        setTipoSolicitud(value);
         break;
       default:
         break;
@@ -107,13 +111,13 @@ const SolicitudServicioPostal: React.FC = () => {
     }
 
     // Validación de campos obligatorios
-    if (!areaSolicitante || !descripcionServicio || !fechaEnvio || !fechaRecepcionMaxima) {
-      setError("El área solicitante, la descripción del servicio, la fecha de envío y la fecha de recepción son obligatorios.");
+    if (!areaSolicitante || !fechaInicio || !fechaFin || !horarioInicio || !horarioFin) {
+      setError("El área solicitante, la fecha de uso y hora de inicio y fin son obligatorias.");
       return;
     }
 
     try {
-      const url = `https://localhost:7094/api/ServicioPostal/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoDeServicio=${encodeURIComponent(tipoServicio)}&catalogoId=${encodeURIComponent("1")}&fechaEnvio=${encodeURIComponent(fechaEnvio)}&fechaRecepcionMaxima=${encodeURIComponent(fechaRecepcionMaxima)}&descripcionServicio=${encodeURIComponent(descripcionServicio)}&estado=${encodeURIComponent("Solicitada")}&observaciones=${encodeURIComponent(observaciones)}`;
+      const url = `https://localhost:7094/api/UsoInmobiliario/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&sala=${encodeURIComponent(sala)}&catalogoId=${encodeURIComponent("1")}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}&horarioInicio=${encodeURIComponent(horarioInicio)}&horarioFin=${encodeURIComponent(horarioFin)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -135,16 +139,16 @@ const SolicitudServicioPostal: React.FC = () => {
       setSuccessMessage("Solicitud enviada exitosamente.");
       setNumeroDeSolicitud("");
       setAreaSolicitante("");
-      setDescripcionServicio("");
+      setFechaInicio("");
+      setFechaFin("");
+      setHorarioInicio("");
+      setHorarioFin("");
+      setDescripcion("");
       setObservaciones("");
-      setFechaEnvio("");
-      setFechaRecepcionMaxima("");
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
     }
   };
-
-
 
   const manejarCancelar = () => {
     navigate("/panel-principal");
@@ -152,7 +156,7 @@ const SolicitudServicioPostal: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="text-center mb-4">Solicitud de Servicio Postal</h2>
+      <h2 className="text-center mb-4">Solicitud de Uso Inmobiliario</h2>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
       {successMessage && <div className="alert alert-success text-center">{successMessage}</div>}
@@ -216,56 +220,35 @@ const SolicitudServicioPostal: React.FC = () => {
             className="form-control"
             id="tipoSolicitud"
             name="tipoSolicitud"
-            value="Servicio Postal"
+            value="Uso Inmobiliario"
             readOnly
           />
         </div>
 
         <div className="mb-3">
-          <label htmlFor="tipoDeServicio" className="form-label">
-            Tipo de Servicio
-          </label>
-          <select
-            className="form-control"
-            id="tipoDeServicio"
-            name="tipoServicio"
-            value={tipoServicio} // Asegúrate de que el estado 'tipoServicio' esté correctamente vinculado
-            onChange={manejarCambio}
-            required
-          >
-            <option value="">Seleccione un tipo de servicio</option>
-            <option value="Llevar">Llevar</option>
-            <option value="Recoger">Recoger</option>
-            <option value="Llevar y Recoger">Llevar y Recoger</option>
-          </select>
-        </div>
-
-
-
-        <div className="mb-3">
-          <label htmlFor="descripcionServicio" className="form-label">
-            Descripción del Servicio
-          </label>
-          <textarea
-            className="form-control"
-            id="descripcionServicio"
-            name="descripcionServicio"
-            value={descripcionServicio}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="fechaEnvio" className="form-label">
-            Fecha de Envío
+          <label htmlFor="sala" className="form-label">
+            Sala
           </label>
           <input
             type="text"
             className="form-control"
-            id="fechaEnvio"
-            name="fechaEnvio"
-            value={fechaEnvio}
+            id="sala"
+            name="sala"
+            value={sala}
+            onChange={manejarCambio}
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="fechaInicio" className="form-label">
+            Fecha de Inicio
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="fechaInicio"
+            name="fechaInicio"
+            value={fechaInicio}
             onChange={manejarCambio}
             required
           />
@@ -275,23 +258,59 @@ const SolicitudServicioPostal: React.FC = () => {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="fechaRecepcionMaxima" className="form-label">
-            Fecha de Recepción Máxima
+          <label htmlFor="fechaFin" className="form-label">
+            Fecha de Fin
           </label>
           <input
             type="text"
             className="form-control"
-            id="fechaRecepcionMaxima"
-            name="fechaRecepcionMaxima"
-            value={fechaRecepcionMaxima}
+            id="fechaFin"
+            name="fechaFin"
+            value={fechaFin}
             onChange={manejarCambio}
             required
           />
           <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-07).
+            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
           </small>
         </div>
 
+        <div className="mb-3">
+          <label htmlFor="horarioInicio" className="form-label">
+            Horario de Inicio
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="horarioInicio"
+            name="horarioInicio"
+            value={horarioInicio}
+            onChange={manejarCambio}
+            required
+          />
+          <small className="form-text text-muted">
+            Por favor, ingrese la hora en formato <strong>HH:MM</strong> (por ejemplo, 09:30).
+          </small>
+
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="horarioFin" className="form-label">
+            Horario de Fin
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="horarioFin"
+            name="horarioFin"
+            value={horarioFin}
+            onChange={manejarCambio}
+            required
+          />
+          <small className="form-text text-muted">
+            Por favor, ingrese la hora en formato <strong>HH:MM</strong> (por ejemplo, 17:45).
+          </small>
+        </div>
 
         <div className="mb-3">
           <label htmlFor="observaciones" className="form-label">
@@ -319,4 +338,4 @@ const SolicitudServicioPostal: React.FC = () => {
   );
 };
 
-export default SolicitudServicioPostal;
+export default SolicitudUsoInmobiliario;

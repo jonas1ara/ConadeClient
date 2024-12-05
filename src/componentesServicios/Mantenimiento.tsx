@@ -1,33 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SolicitudMantenimiento: React.FC = () => {
+const SolicitudServicioMantenimiento: React.FC = () => {
   const navigate = useNavigate();
 
-  const [catalogoID, setCatalogoID] = useState<number | "">("");
-  const [tipoMantenimiento, setTipoMantenimiento] = useState<string>("Preventivo");
+  const [numeroDeSerie, setNumeroDeSerie] = useState<string>("");
+  const [fechaSolicitud, setFechaSolicitud] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [areaSolicitante, setAreaSolicitante] = useState<string>("");
+  const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
+  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Mantenimiento"); 
+  const [tipoServicio, setTipoServicio] = useState<string>("");
   const [descripcionServicio, setDescripcionServicio] = useState<string>("");
   const [fechaInicio, setFechaInicio] = useState<string>("");
-  const [fechaEntrega, setFechaEntrega] = useState<string>("");
-  const [estado, setEstado] = useState<string>("No iniciado");
+  const [fechaFin, setFechaFin] = useState<string>("");
+  const [estado, setEstado] = useState<string>("Solicitada");
   const [observaciones, setObservaciones] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
 
-  const catalogoAreas = [
-    { id: 1, nombre: "Área 1" },
-    { id: 2, nombre: "Área 2" },
-    { id: 3, nombre: "Área 3" },
-  ]; // Simulación de datos de CatArea.
+  const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
 
-  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // Recuperar usuario desde localStorage
+  useEffect(() => {
+    const usuarioIdGuardado = localStorage.getItem("idUsuario");
+    if (usuarioIdGuardado) {
+      setUsuarioSolicitanteID(Number(usuarioIdGuardado)); // Guardar el usuarioId como número
+    } else {
+      setError("Usuario no encontrado. Por favor, inicie sesión.");
+      console.error("usuarioId no encontrado en localStorage");
+    }
+  }, []);
+
+  // Generar número de solicitud (simulación)
+  useEffect(() => {
+    const numeroSerie = Math.floor(Math.random() * 10000); // Número aleatorio para la solicitud
+    setNumeroDeSerie(numeroSerie.toString());
+  }, []);
+
+  // Cargar áreas disponibles desde la API
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const response = await fetch("https://localhost:7094/api/CatArea/Listar");
+        if (!response.ok) {
+          throw new Error("Error al obtener áreas.");
+        }
+        const data = await response.json();
+
+        if (Array.isArray(data.catAreas)) {
+          setAreasCatalogo(data.catAreas);
+        } else {
+          setError("Los datos de áreas no son válidos.");
+        }
+      } catch (error) {
+        setError("No se pudieron cargar las áreas.");
+      }
+    };
+    fetchAreas();
+  }, []);
+
+  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     switch (name) {
-      case "catalogoID":
-        setCatalogoID(value === "" ? "" : parseInt(value, 10));
+      case "areaSolicitante":
+        setAreaSolicitante(value);
         break;
-      case "tipoMantenimiento":
-        setTipoMantenimiento(value);
+      case "tipoSolitud":
+        setTipoSolicitud(value);
+        break;
+      case "tipoServicio":
+        setTipoServicio(value);
         break;
       case "descripcionServicio":
         setDescripcionServicio(value);
@@ -35,8 +77,8 @@ const SolicitudMantenimiento: React.FC = () => {
       case "fechaInicio":
         setFechaInicio(value);
         break;
-      case "fechaEntrega":
-        setFechaEntrega(value);
+      case "fechaFin":
+        setFechaFin(value);
         break;
       case "estado":
         setEstado(value);
@@ -54,39 +96,47 @@ const SolicitudMantenimiento: React.FC = () => {
     setError("");
     setSuccessMessage("");
 
-    if (!catalogoID || !tipoMantenimiento || !descripcionServicio || !fechaInicio) {
-      setError("Por favor, complete todos los campos obligatorios.");
+    // Validar si usuarioSolicitanteID está presente
+    if (!usuarioSolicitanteID) {
+      setError("El ID del usuario solicitante es obligatorio.");
+      return;
+    }
+
+    // Validación de campos obligatorios
+    if (!areaSolicitante || !fechaInicio) {
+      setError("El área solicitante y la fecha de inicio son obligatorias.");
       return;
     }
 
     try {
-      const response = await fetch("https://localhost:7094/api/Mantenimiento", {
+      const url = `https://localhost:7094/api/Mantenimiento/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSerie)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoServicio=${encodeURIComponent(tipoServicio)}&catalogoId=${encodeURIComponent("1")}&descripcionServicio=${encodeURIComponent(descripcionServicio)}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaEntrega=${encodeURIComponent(fechaFin)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          catalogoID,
-          tipoMantenimiento,
-          descripcionServicio,
-          fechaInicio,
-          fechaEntrega: fechaEntrega || null,
-          estado,
-          observaciones,
-        }),
       });
 
       if (!response.ok) {
-        throw new Error("Hubo un error al crear la solicitud.");
+        const errorData = await response.json();
+        console.error("Error al crear la solicitud:", errorData);
+        setError(errorData.title || "Hubo un error al crear la solicitud.");
+        if (errorData.errors) {
+          setError(JSON.stringify(errorData.errors));
+        }
+        return;
       }
 
       setSuccessMessage("Solicitud enviada exitosamente.");
-      setCatalogoID("");
-      setTipoMantenimiento("Preventivo");
+      setNumeroDeSerie("");
+      setFechaSolicitud("");
+      setAreaSolicitante("");
+      setTipoSolicitud("");
+      setTipoServicio("");
       setDescripcionServicio("");
       setFechaInicio("");
-      setFechaEntrega("");
-      setEstado("No iniciado");
+      setFechaFin("");
       setObservaciones("");
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
@@ -106,38 +156,81 @@ const SolicitudMantenimiento: React.FC = () => {
 
       <form onSubmit={manejarEnvio}>
         <div className="mb-3">
-          <label htmlFor="catalogoID" className="form-label">
-            Área
+          <label htmlFor="numeroDeSolicitud" className="form-label">
+            Número de Solicitud
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="numeroDeSolicitud"
+            name="numeroDeSolicitud"
+            value={numeroDeSerie}
+            readOnly
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="fechaSolicitud" className="form-label">
+            Fecha de Solicitud
+          </label>
+          <input
+            type="date"
+            className="form-control"
+            id="fechaSolicitud"
+            name="fechaSolicitud"
+            value={fechaSolicitud}
+            readOnly
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="areaSolicitante" className="form-label">
+            Área Solicitante
           </label>
           <select
             className="form-control"
-            id="catalogoID"
-            name="catalogoID"
-            value={catalogoID}
+            id="areaSolicitante"
+            name="areaSolicitante"
+            value={areaSolicitante}
             onChange={manejarCambio}
             required
           >
             <option value="">Seleccione un área</option>
-            {catalogoAreas.map((area) => (
-              <option key={area.id} value={area.id}>
-                {area.nombre}
+            {Array.isArray(areasCatalogo) && areasCatalogo.map((area) => (
+              <option key={area.idArea} value={area.idArea}>
+                {area.nombreArea}
               </option>
             ))}
           </select>
         </div>
 
         <div className="mb-3">
-          <label htmlFor="tipoMantenimiento" className="form-label">
-            Tipo de Mantenimiento
+          <label htmlFor="tipoSolicitud" className="form-label">
+            Tipo de Solicitud
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="tipoSolicitud"
+            name="tipoSolicitud"
+            value="Mantenimiento"
+            readOnly
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="tipoDeServicio" className="form-label">
+            Tipo de Servicio
           </label>
           <select
             className="form-control"
-            id="tipoMantenimiento"
-            name="tipoMantenimiento"
-            value={tipoMantenimiento}
+            id="tipoDeServicio"
+            name="tipoServicio"
+            value={tipoServicio} // Asegúrate de que el estado 'tipoServicio' esté correctamente vinculado
             onChange={manejarCambio}
             required
           >
+            <option value="">Seleccione un tipo de servicio</option>
             <option value="Preventivo">Preventivo</option>
             <option value="Correctivo">Correctivo</option>
           </select>
@@ -151,11 +244,10 @@ const SolicitudMantenimiento: React.FC = () => {
             className="form-control"
             id="descripcionServicio"
             name="descripcionServicio"
-            rows={3}
             value={descripcionServicio}
             onChange={manejarCambio}
             required
-          ></textarea>
+          />
         </div>
 
         <div className="mb-3">
@@ -163,7 +255,7 @@ const SolicitudMantenimiento: React.FC = () => {
             Fecha de Inicio
           </label>
           <input
-            type="datetime-local"
+            type="text"
             className="form-control"
             id="fechaInicio"
             name="fechaInicio"
@@ -171,37 +263,27 @@ const SolicitudMantenimiento: React.FC = () => {
             onChange={manejarCambio}
             required
           />
+          <small className="form-text text-muted">
+            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
+          </small>
         </div>
 
         <div className="mb-3">
-          <label htmlFor="fechaEntrega" className="form-label">
-            Fecha de Entrega (opcional)
+          <label htmlFor="fechaFin" className="form-label">
+            Fecha de Fin
           </label>
           <input
-            type="datetime-local"
+            type="text"
             className="form-control"
-            id="fechaEntrega"
-            name="fechaEntrega"
-            value={fechaEntrega}
+            id="fechaFin"
+            name="fechaFin"
+            value={fechaFin}
             onChange={manejarCambio}
+            required
           />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="estado" className="form-label">
-            Estado
-          </label>
-          <select
-            className="form-control"
-            id="estado"
-            name="estado"
-            value={estado}
-            onChange={manejarCambio}
-          >
-            <option value="No iniciado">No iniciado</option>
-            <option value="En proceso">En proceso</option>
-            <option value="Entregado">Entregado</option>
-          </select>
+          <small className="form-text text-muted">
+            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
+          </small>
         </div>
 
         <div className="mb-3">
@@ -212,18 +294,17 @@ const SolicitudMantenimiento: React.FC = () => {
             className="form-control"
             id="observaciones"
             name="observaciones"
-            rows={3}
             value={observaciones}
             onChange={manejarCambio}
-          ></textarea>
+          />
         </div>
 
         <div className="d-flex justify-content-between">
-          <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
-            Cancelar
-          </button>
           <button type="submit" className="btn btn-primary">
             Enviar Solicitud
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
+            Cancelar
           </button>
         </div>
       </form>
@@ -231,4 +312,4 @@ const SolicitudMantenimiento: React.FC = () => {
   );
 };
 
-export default SolicitudMantenimiento;
+export default SolicitudServicioMantenimiento;

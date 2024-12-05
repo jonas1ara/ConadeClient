@@ -7,26 +7,58 @@ const SolicitudServicioTransporte: React.FC = () => {
   const [numeroDeSolicitud, setNumeroDeSolicitud] = useState<string>("");
   const [fechaSolicitud, setFechaSolicitud] = useState<string>(new Date().toISOString().split("T")[0]);
   const [areaSolicitante, setAreaSolicitante] = useState<string>("");
-  const [usuarioSolicitante, setUsuarioSolicitante] = useState<string>("");
-  const [tipoServicio, setTipoServicio] = useState<string>("Llevar");
-  const [descripcionServicio, setDescripcionServicio] = useState<string>("");
+  const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
+  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Servicio Transporte");
+  const [tipoServicio, setTipoServicio] = useState<string>("");
+  const [origen, setOrigen] = useState<string>("");
+  const [destino, setDestino] = useState<string>("");
+  const [fechaTransporte, setFechaTransporte] = useState<string>("");
+  const [fechaTransporteVuelta, setFechaTransporteVuelta] = useState<string>("");
   const [estado, setEstado] = useState<string>("Solicitada");
   const [observaciones, setObservaciones] = useState<string>("");
+  const [descripcion, setDescripcion] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
 
-  const areasCatalogo = ["Área 1", "Área 2", "Área 3"]; // Lista simulada de áreas
+  const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
 
+  // Recuperar usuario desde localStorage
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    if (usuarioGuardado) {
-      setUsuarioSolicitante(usuarioGuardado);
+    const usuarioIdGuardado = localStorage.getItem("idUsuario");
+    if (usuarioIdGuardado) {
+      setUsuarioSolicitanteID(Number(usuarioIdGuardado)); // Guardar el usuarioId como número
+    } else {
+      setError("Usuario no encontrado. Por favor, inicie sesión.");
+      console.error("usuarioId no encontrado en localStorage");
     }
   }, []);
 
+  // Generar número de solicitud (simulación)
   useEffect(() => {
-    const numeroSerie = Math.floor(Math.random() * 10000);
+    const numeroSerie = Math.floor(Math.random() * 10000); // Número aleatorio para la solicitud
     setNumeroDeSolicitud(numeroSerie.toString());
+  }, []);
+
+  // Cargar áreas disponibles desde la API
+  useEffect(() => {
+    const fetchAreas = async () => {
+      try {
+        const response = await fetch("https://localhost:7094/api/CatArea/Listar");
+        if (!response.ok) {
+          throw new Error("Error al obtener áreas.");
+        }
+        const data = await response.json();
+
+        if (Array.isArray(data.catAreas)) {
+          setAreasCatalogo(data.catAreas);
+        } else {
+          setError("Los datos de áreas no son válidos.");
+        }
+      } catch (error) {
+        setError("No se pudieron cargar las áreas.");
+      }
+    };
+    fetchAreas();
   }, []);
 
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -38,8 +70,20 @@ const SolicitudServicioTransporte: React.FC = () => {
       case "tipoServicio":
         setTipoServicio(value);
         break;
-      case "descripcionServicio":
-        setDescripcionServicio(value);
+      case "origen":
+        setOrigen(value);
+        break;
+      case "destino":
+        setDestino(value);
+        break;
+      case "fechaTransporte":
+        setFechaTransporte(value);
+        break;
+      case "fechaTransporteVuelta":
+        setFechaTransporteVuelta(value);
+        break;
+      case "descripcion":
+        setDescripcion(value);
         break;
       case "estado":
         setEstado(value);
@@ -57,37 +101,46 @@ const SolicitudServicioTransporte: React.FC = () => {
     setError("");
     setSuccessMessage("");
 
-    if (!areaSolicitante || !descripcionServicio) {
-      setError("El área solicitante y la descripción del servicio son obligatorios.");
+    // Validar si usuarioSolicitanteID está presente
+    if (!usuarioSolicitanteID) {
+      setError("El ID del usuario solicitante es obligatorio.");
+      return;
+    }
+
+    // Validación de campos obligatorios
+    if (!areaSolicitante || !origen || !destino || !fechaTransporte) {
+      setError("El área solicitante, el origen, el destino y la fecha de transporte son obligatorios.");
       return;
     }
 
     try {
-      const response = await fetch("https://localhost:7094/api/Solicitudes/ServicioTransporte", {
+      const url = `https://localhost:7094/api/ServicioTransporte/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoDeServicio=${encodeURIComponent(tipoServicio)}&catalogoId=${encodeURIComponent("1")}&fechaTransporte=${encodeURIComponent(fechaTransporte)}&fechaTransporteVuelta=${encodeURIComponent(fechaTransporteVuelta)}&origen=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino)}&descripcionServicio=${encodeURIComponent(descripcion)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
+
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          numeroDeSolicitud,
-          fechaSolicitud,
-          areaSolicitante,
-          usuarioSolicitante,
-          tipoServicio,
-          descripcionServicio,
-          estado,
-          observaciones,
-        }),
       });
 
       if (!response.ok) {
-        throw new Error("Hubo un error al crear la solicitud.");
+        const errorData = await response.json();
+        console.error("Error al crear la solicitud:", errorData);
+        setError(errorData.title || "Hubo un error al crear la solicitud.");
+        if (errorData.errors) {
+          setError(JSON.stringify(errorData.errors));
+        }
+        return;
       }
 
       setSuccessMessage("Solicitud enviada exitosamente.");
       setNumeroDeSolicitud("");
       setAreaSolicitante("");
-      setDescripcionServicio("");
+      setOrigen("");
+      setDestino("");
+      setFechaTransporte("");
+      setFechaTransporteVuelta("");
+      setDescripcion("");
       setObservaciones("");
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
@@ -95,7 +148,7 @@ const SolicitudServicioTransporte: React.FC = () => {
   };
 
   const manejarCancelar = () => {
-    navigate("/panel-principal"); // Ajusta la ruta según tu aplicación
+    navigate("/panel-principal");
   };
 
   return (
@@ -147,75 +200,124 @@ const SolicitudServicioTransporte: React.FC = () => {
             required
           >
             <option value="">Seleccione un área</option>
-            {areasCatalogo.map((area, index) => (
-              <option key={index} value={area}>
-                {area}
+            {Array.isArray(areasCatalogo) && areasCatalogo.map((area) => (
+              <option key={area.idArea} value={area.idArea}>
+                {area.nombreArea}
               </option>
             ))}
           </select>
         </div>
 
         <div className="mb-3">
-          <label htmlFor="usuarioSolicitante" className="form-label">
-            Usuario Solicitante
+          <label htmlFor="tipoSolicitud" className="form-label">
+            Tipo de Solicitud
           </label>
           <input
             type="text"
             className="form-control"
-            id="usuarioSolicitante"
-            name="usuarioSolicitante"
-            value={usuarioSolicitante}
+            id="tipoSolicitud"
+            name="tipoSolicitud"
+            value="Servicio Transporte"
             readOnly
           />
         </div>
 
         <div className="mb-3">
-          <label htmlFor="tipoServicio" className="form-label">
+          <label htmlFor="tipoDeServicio" className="form-label">
             Tipo de Servicio
           </label>
           <select
             className="form-control"
-            id="tipoServicio"
+            id="tipoDeServicio"
             name="tipoServicio"
-            value={tipoServicio}
+            value={tipoServicio} // Asegúrate de que el estado 'tipoServicio' esté correctamente vinculado
             onChange={manejarCambio}
+            required
           >
+            <option value="">Seleccione un tipo de servicio</option>
             <option value="Llevar">Llevar</option>
             <option value="Recoger">Recoger</option>
-            <option value="LlevarYRecoger">Llevar y Recoger</option>
+            <option value="Llevar y Recoger">Llevar y Recoger</option>
           </select>
         </div>
 
         <div className="mb-3">
-          <label htmlFor="descripcionServicio" className="form-label">
-            Descripción del Servicio
+          <label htmlFor="origen" className="form-label">
+            Origen
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="origen"
+            name="origen"
+            value={origen}
+            onChange={manejarCambio}
+            required
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="destino" className="form-label">
+            Destino
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="destino"
+            name="destino"
+            value={destino}
+            onChange={manejarCambio}
+            required
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="fechaTransporte" className="form-label">
+            Fecha de Transporte
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="fechaTransporte"
+            name="fechaTransporte"
+            value={fechaTransporte}
+            onChange={manejarCambio}
+            required
+          />
+          <small className="form-text text-muted">
+            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
+          </small>
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="fechaTransporteVuelta" className="form-label">
+            Fecha de Transporte de Vuelta
+          </label>
+          <input
+            type="text"
+            className="form-control"
+            id="fechaTransporteVuelta"
+            name="fechaTransporteVuelta"
+            value={fechaTransporteVuelta}
+            onChange={manejarCambio}
+            required
+          />
+          <small className="form-text text-muted">
+            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
+          </small>
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="descripcion" className="form-label">
+            Descripción del servicio
           </label>
           <textarea
             className="form-control"
-            id="descripcionServicio"
-            name="descripcionServicio"
-            rows={3}
-            value={descripcionServicio}
+            id="descripcion"
+            name="descripcion"
+            value={descripcion}
             onChange={manejarCambio}
-            required
-          ></textarea>
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="estado" className="form-label">
-            Estado
-          </label>
-          <select
-            className="form-control"
-            id="estado"
-            name="estado"
-            value={estado}
-            onChange={manejarCambio}
-          >
-            <option value="Solicitada">Solicitada</option>
-            <option value="Atendida">Atendida</option>
-            <option value="Rechazada">Rechazada</option>
-          </select>
+          />
         </div>
 
         <div className="mb-3">
@@ -226,18 +328,17 @@ const SolicitudServicioTransporte: React.FC = () => {
             className="form-control"
             id="observaciones"
             name="observaciones"
-            rows={3}
             value={observaciones}
             onChange={manejarCambio}
-          ></textarea>
+          />
         </div>
 
         <div className="d-flex justify-content-between">
-          <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
-            Cancelar
-          </button>
           <button type="submit" className="btn btn-primary">
             Enviar Solicitud
+          </button>
+          <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
+            Cancelar
           </button>
         </div>
       </form>

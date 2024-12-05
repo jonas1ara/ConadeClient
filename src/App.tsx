@@ -7,9 +7,12 @@ import PanelPrincipal from "./componentesServicios/PanelPrincipal";
 import Mantenimiento from "./componentesServicios/Mantenimiento";
 import ServicioPostal from "./componentesServicios/ServicioPostal";
 import ServicioTransporte from "./componentesServicios/ServicioTransporte";
-import UsoAuditorios from "./componentesServicios/UsoAuditorios";
+import UsoAuditorios from "./componentesServicios/UsoInmobiliario";
 import NavBar from "./hooks/NavBar";
 import GestionSolicitudes from "./componentesSolicitudes/GestionSolicitudes"; // Importamos la nueva pantalla
+import SolicitudesPorUsuario from "./componentesSolicitudes/SolicitudesPorUsuario";
+import AprobarSolicitud from "./componentesSolicitudes/AprobarSolicitud";
+import RechazarSolicitud from "./componentesSolicitudes/RechazarSolicitud";
 
 function App() {
   UseTheme(); // Aplicar el tema automáticamente
@@ -46,6 +49,7 @@ function App() {
             </>
           ) : <Navigate to="/" />} 
         />
+
         <Route 
           path="/gestion-solicitudes" 
           element={isAuthenticated() ? (
@@ -55,6 +59,39 @@ function App() {
             </>
           ) : <Navigate to="/" />} 
         />
+
+        <Route 
+          path="/solicitudes-por-usuario" 
+          element={isAuthenticated() ? (
+            <>
+              <NavBar/>
+              <SolicitudesPorUsuario />
+            </>
+          ) : <Navigate to="/" />}
+        />
+
+        <Route 
+          path="/aprobar-solicitud/:id" 
+          element={isAuthenticated() ? (
+            <>
+              <NavBar/>
+              <AprobarSolicitud />
+            </>
+          ) : <Navigate to="/" />}
+
+        />
+
+        <Route 
+          path="/rechazar-solicitud/:id" 
+          element={isAuthenticated() ? (
+            <>
+              <NavBar/>
+              <RechazarSolicitud />
+            </>
+          ) : <Navigate to="/" />}
+
+        />
+
         <Route 
           path="/servicio-postal" 
           element={isAuthenticated() ? (

@@ -3,12 +3,27 @@ import { useNavigate } from "react-router-dom";
 
 const NavBar: React.FC = () => {
   const [usuario, setUsuario] = useState<string | null>(null); // Estado dinámico para el usuario
+  const [rol, setRol] = useState<string | null>(null); // Estado para el rol
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // Estado para el modo oscuro
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Obtener usuario desde localStorage al montar el componente
+    // Obtener usuario y rol desde localStorage al montar el componente
     const usuarioActual = localStorage.getItem("usuario");
+    const rolActual = localStorage.getItem("rol");
+
+    // Verificar la preferencia de color del navegador
+    const theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
+    // Aplicar el tema detectado
+    setIsDarkMode(theme === "dark");
+    document.documentElement.setAttribute('data-bs-theme', theme);
+
+    // Almacenar la preferencia del tema en localStorage para que se recuerde
+    localStorage.setItem("theme", theme);
+
     setUsuario(usuarioActual);
+    setRol(rolActual);
   }, []); // Solo se ejecuta al montar el componente
 
   const manejarCerrarSesion = () => {
@@ -18,7 +33,6 @@ const NavBar: React.FC = () => {
   };
 
   const manejarNavegacion = () => {
-    const rol = localStorage.getItem("rol");
     if (rol === "Usuario") {
       navigate("/panel-principal");
     } else if (rol === "Admin") {
@@ -26,8 +40,12 @@ const NavBar: React.FC = () => {
     }
   };
 
+  const manejarVerSolicitudes = () => {
+    navigate("/solicitudes-por-usuario"); // Redirigir a la página de solicitudes
+  };
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+    <nav className={`navbar navbar-expand-lg ${isDarkMode ? 'navbar-dark bg-dark' : 'navbar-light bg-light'}`}>
       <div className="container-fluid">
         <button
           className="navbar-brand btn btn-link"
@@ -54,8 +72,21 @@ const NavBar: React.FC = () => {
                 {usuario ? `Bienvenido, ${usuario}` : "Bienvenido"}
               </span>
             </li>
+
+            {/* Mostrar el botón de "Solicitudes" solo si el rol es "Usuario" */}
+            {rol === "Usuario" && (
+              <li className="nav-item">
+                <button
+                  className={`btn ${isDarkMode ? 'btn-outline-light' : 'btn-outline-dark'} me-1`}
+                  onClick={manejarVerSolicitudes}
+                >
+                  Solicitudes
+                </button>
+              </li>
+            )}
+
             <li className="nav-item">
-              <button className="btn btn-danger" onClick={manejarCerrarSesion}>
+              <button className="btn btn-danger ms-1" onClick={manejarCerrarSesion}>
                 Cerrar Sesión
               </button>
             </li>

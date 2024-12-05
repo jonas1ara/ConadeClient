@@ -1,60 +1,81 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Usuario } from "../models/Usuario"; // Importar el modelo Usuario
+import { Usuario } from "../models/Usuario";
 
 const RegistroUsuario: React.FC = () => {
-  const [usuario, setUsuario] = useState<Usuario>(new Usuario()); // Usamos el modelo Usuario
+  const [usuario, setUsuario] = useState<Usuario>(new Usuario());
   const [error, setError] = useState<string>("");
-  const [successMessage, setSuccessMessage] = useState<string>(""); // Definir el estado successMessage
+  const [successMessage, setSuccessMessage] = useState<string>("");
   const navigate = useNavigate();
 
-  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    // Aseguramos que el areaID siempre tenga un valor numérico
+    if (usuario.areaID === undefined) {
+      setUsuario((prevState) => ({
+        ...prevState,
+        areaID: 1, // Establecemos un valor inicial por defecto (ejemplo: 1)
+      }));
+    }
+  }, [usuario.areaID]);
+
+  const manejarCambio = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
-    // Actualizamos el estado del usuario con los valores de los inputs
+    // Aseguramos que el campo areaID se maneje como número y no como string
     setUsuario({
       ...usuario,
-      [name]: value,
+      [name]: name === "areaID" ? parseInt(value, 10) : value,
     });
   };
 
   const capitalizeRole = (role: string) => {
     return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
   };
-  
+
   const manejarRegistro = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccessMessage(""); // Limpiar mensaje de éxito antes de intentar el registro
-  
+    setSuccessMessage("");
+
     try {
-      // Usamos la función para capitalizar el rol
       const rolCapitalizado = capitalizeRole(usuario.rol);
-  
-      // Construir la URL con los parámetros de consulta
-      const url = `https://localhost:7094/api/Usuario/Crear?nombre=${encodeURIComponent(usuario.nombre)}&apellidoPaterno=${encodeURIComponent(usuario.apellidoPaterno)}&apellidoMaterno=${encodeURIComponent(usuario.apellidoMaterno)}&claveEmpleado=${encodeURIComponent(usuario.claveEmpleado)}&nombreUsuario=${encodeURIComponent(usuario.nombreUsuario)}&contrasena=${encodeURIComponent(usuario.contrasena)}&rol=${encodeURIComponent(rolCapitalizado)}`;
-  
-      // Realizamos la petición de registro
+
+      const url = `https://localhost:7094/api/Usuario/Crear?nombre=${encodeURIComponent(
+        usuario.nombre
+      )}&apellidoPaterno=${encodeURIComponent(
+        usuario.apellidoPaterno
+      )}&apellidoMaterno=${encodeURIComponent(
+        usuario.apellidoMaterno
+      )}&claveEmpleado=${encodeURIComponent(
+        usuario.claveEmpleado
+      )}&nombreUsuario=${encodeURIComponent(
+        usuario.nombreUsuario
+      )}&contrasena=${encodeURIComponent(
+        usuario.contrasena
+      )}&rol=${encodeURIComponent(rolCapitalizado)}${
+        rolCapitalizado === "Admin" ? `&areaID=${usuario.areaID}` : ""
+      }`;
+
       const response = await fetch(url, {
-        method: "POST", // Mantenemos POST aunque los datos se pasan en la URL
+        method: "POST",
       });
-  
+
       if (!response.ok) {
         throw new Error("Hubo un error al crear el usuario");
+      
       }
-  
-      const data = await response.json();
-      setSuccessMessage("Usuario creado exitosamente"); // Actualizar el mensaje de éxito
-      // Redirigir a otra página, si es necesario
-      navigate("/"); // O a la pantalla de login, por ejemplo
+
+      setSuccessMessage("Usuario creado exitosamente");
+      setTimeout(() => navigate("/"), 2000);
     } catch (error: any) {
       setError(error.message || "Error al registrar el usuario");
     }
   };
-  
 
   const manejarCancelar = () => {
-    navigate("/"); // Redirige al login si se cancela
+    navigate("/");
   };
 
   return (
@@ -62,7 +83,11 @@ const RegistroUsuario: React.FC = () => {
       <div className="card p-4" style={{ maxWidth: "500px", width: "100%" }}>
         <h2 className="text-center">Registrar Usuario</h2>
         {error && <div className="alert alert-danger text-center">{error}</div>}
-        {successMessage && <div className="alert alert-success text-center">{successMessage}</div>} {/* Mostrar mensaje de éxito */}
+        {successMessage && (
+          <div className="alert alert-success text-center">
+            {successMessage}
+          </div>
+        )}
         <form onSubmit={manejarRegistro}>
           <div className="mb-3">
             <label htmlFor="nombre" className="form-label">
@@ -165,11 +190,36 @@ const RegistroUsuario: React.FC = () => {
               <option value="usuario">Usuario</option>
             </select>
           </div>
+          {usuario.rol.toLowerCase() === "admin" && (
+            <div className="mb-3">
+              <label htmlFor="areaID" className="form-label">
+                Área
+              </label>
+              <select
+                id="areaID"
+                name="areaID"
+                className="form-select"
+                value={usuario.areaID}
+                onChange={manejarCambio}
+                required
+              >
+                <option value="">Seleccionar área</option>
+                <option value="1">Servicio postal</option>
+                <option value="2">Servicio de transporte</option>
+                <option value="3">Uso de auditorios</option>
+                <option value="4">Mantenimiento</option>
+              </select>
+            </div>
+          )}
           <div className="d-flex justify-content-between">
             <button type="submit" className="btn btn-primary">
               Registrar
             </button>
-            <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={manejarCancelar}
+            >
               Cancelar
             </button>
           </div>
