@@ -8,13 +8,12 @@ const SolicitudServicioMantenimiento: React.FC = () => {
   const [fechaSolicitud, setFechaSolicitud] = useState<string>(new Date().toISOString().split("T")[0]);
   const [areaSolicitante, setAreaSolicitante] = useState<string>("");
   const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
-  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Mantenimiento"); 
+  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Mantenimiento");
   const [tipoServicio, setTipoServicio] = useState<string>("");
   const [descripcionServicio, setDescripcionServicio] = useState<string>("");
   const [fechaInicio, setFechaInicio] = useState<string>("");
   const [fechaFin, setFechaFin] = useState<string>("");
   const [estado, setEstado] = useState<string>("Solicitada");
-  const [observaciones, setObservaciones] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
 
@@ -24,7 +23,7 @@ const SolicitudServicioMantenimiento: React.FC = () => {
   useEffect(() => {
     const usuarioIdGuardado = localStorage.getItem("idUsuario");
     if (usuarioIdGuardado) {
-      setUsuarioSolicitanteID(Number(usuarioIdGuardado)); // Guardar el usuarioId como número
+      setUsuarioSolicitanteID(Number(usuarioIdGuardado));
     } else {
       setError("Usuario no encontrado. Por favor, inicie sesión.");
       console.error("usuarioId no encontrado en localStorage");
@@ -65,9 +64,6 @@ const SolicitudServicioMantenimiento: React.FC = () => {
       case "areaSolicitante":
         setAreaSolicitante(value);
         break;
-      case "tipoSolitud":
-        setTipoSolicitud(value);
-        break;
       case "tipoServicio":
         setTipoServicio(value);
         break;
@@ -83,9 +79,6 @@ const SolicitudServicioMantenimiento: React.FC = () => {
       case "estado":
         setEstado(value);
         break;
-      case "observaciones":
-        setObservaciones(value);
-        break;
       default:
         break;
     }
@@ -96,20 +89,18 @@ const SolicitudServicioMantenimiento: React.FC = () => {
     setError("");
     setSuccessMessage("");
 
-    // Validar si usuarioSolicitanteID está presente
     if (!usuarioSolicitanteID) {
       setError("El ID del usuario solicitante es obligatorio.");
       return;
     }
 
-    // Validación de campos obligatorios
     if (!areaSolicitante || !fechaInicio) {
       setError("El área solicitante y la fecha de inicio son obligatorias.");
       return;
     }
 
     try {
-      const url = `https://localhost:7094/api/Mantenimiento/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSerie)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoServicio=${encodeURIComponent(tipoServicio)}&catalogoId=${encodeURIComponent("1")}&descripcionServicio=${encodeURIComponent(descripcionServicio)}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaEntrega=${encodeURIComponent(fechaFin)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
+      const url = `https://localhost:7094/api/Mantenimiento/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSerie)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoServicio=${encodeURIComponent(tipoServicio)}&catalogoId=${encodeURIComponent("1")}&descripcionServicio=${encodeURIComponent(descripcionServicio)}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaEntrega=${encodeURIComponent(fechaFin)}&estado=${encodeURIComponent(estado)}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -137,7 +128,6 @@ const SolicitudServicioMantenimiento: React.FC = () => {
       setDescripcionServicio("");
       setFechaInicio("");
       setFechaFin("");
-      setObservaciones("");
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
     }
@@ -226,7 +216,7 @@ const SolicitudServicioMantenimiento: React.FC = () => {
             className="form-control"
             id="tipoDeServicio"
             name="tipoServicio"
-            value={tipoServicio} // Asegúrate de que el estado 'tipoServicio' esté correctamente vinculado
+            value={tipoServicio}
             onChange={manejarCambio}
             required
           >
@@ -286,24 +276,11 @@ const SolicitudServicioMantenimiento: React.FC = () => {
           </small>
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="observaciones" className="form-label">
-            Observaciones
-          </label>
-          <textarea
-            className="form-control"
-            id="observaciones"
-            name="observaciones"
-            value={observaciones}
-            onChange={manejarCambio}
-          />
-        </div>
-
-        <div className="d-flex justify-content-between">
-          <button type="submit" className="btn btn-primary">
-            Enviar Solicitud
+        <div className="text-center">
+          <button type="submit" className="btn btn-primary me-2">
+            Guardar Solicitud
           </button>
-          <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
+          <button type="button" className="btn btn-danger" onClick={manejarCancelar}>
             Cancelar
           </button>
         </div>

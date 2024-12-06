@@ -312,19 +312,6 @@ const SolicitudUsoInmobiliario: React.FC = () => {
           </small>
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="observaciones" className="form-label">
-            Observaciones
-          </label>
-          <textarea
-            className="form-control"
-            id="observaciones"
-            name="observaciones"
-            value={observaciones}
-            onChange={manejarCambio}
-          />
-        </div>
-
         <div className="d-flex justify-content-between">
           <button type="submit" className="btn btn-primary">
             Enviar Solicitud

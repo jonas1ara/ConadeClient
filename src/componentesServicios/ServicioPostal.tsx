@@ -136,7 +136,6 @@ const SolicitudServicioPostal: React.FC = () => {
       setNumeroDeSolicitud("");
       setAreaSolicitante("");
       setDescripcionServicio("");
-      setObservaciones("");
       setFechaEnvio("");
       setFechaRecepcionMaxima("");
     } catch (error: any) {
@@ -290,20 +289,6 @@ const SolicitudServicioPostal: React.FC = () => {
           <small className="form-text text-muted">
             Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-07).
           </small>
-        </div>
-
-
-        <div className="mb-3">
-          <label htmlFor="observaciones" className="form-label">
-            Observaciones
-          </label>
-          <textarea
-            className="form-control"
-            id="observaciones"
-            name="observaciones"
-            value={observaciones}
-            onChange={manejarCambio}
-          />
         </div>
 
         <div className="d-flex justify-content-between">

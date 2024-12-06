@@ -7,18 +7,31 @@ interface Solicitud {
   fechaSolicitud: string;
   tipoSolicitud: string;
   estado: string;
-  observaciones: string;
-  areaSolicitante: string;
-  usuarioSolicitante: string; // Usuario relacionado
+  areaSolicitante: number; // Cambiado a number para relacionar con el ID
+  usuarioSolicitante: number; // Cambiado a number para relacionar con el ID
+  descripcionServicio: string;
+}
+
+interface Area {
+  idArea: number;
+  nombreArea: string;
+}
+
+interface Usuario {
+  id: number;
+  nombreUsuario: string;
 }
 
 const GestionSolicitudes: React.FC = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [error, setError] = useState<string>("");
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [ordenFecha, setOrdenFecha] = useState<"asc" | "desc" | null>(null);
   const [paginaActual, setPaginaActual] = useState(1);
   const solicitudesPorPagina = 10; // Número de elementos por página
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,9 +70,71 @@ const GestionSolicitudes: React.FC = () => {
       }
     };
 
+
+
     obtenerSolicitudes();
   }, []);
 
+  useEffect(() => {
+    const obtenerAreas = async () => {
+      try {
+        const response = await fetch("https://localhost:7094/api/CatArea/Listar");
+        if (!response.ok) {
+          throw new Error("Error al obtener las áreas.");
+        }
+  
+        const data = await response.json();
+        console.log("Áreas cargadas:", data.catAreas);  // Log para verificar los datos
+        setAreas(Array.isArray(data.catAreas) ? data.catAreas : []);
+      } catch (error: any) {
+        console.error("Error al cargar las áreas:", error);
+        setError(error.message || "Hubo un problema al cargar las áreas.");
+      }
+    };
+  
+    obtenerAreas();
+  }, []);
+
+  useEffect(() => { console.log("Estado de áreas actualizado:", areas); }, [areas]);
+
+  const obtenerNombreArea = (id: number) => {
+    console.log("Áreas disponibles:", areas);
+    const area = areas.find((area) => area.idArea === id);
+    return area ? area.nombreArea : "No definida";
+  };
+  
+  
+  
+  useEffect(() => {
+    const obtenerUsuarios = async () => {
+      try {
+        const response = await fetch("https://localhost:7094/api/Usuario/Listar");
+        if (!response.ok) {
+          throw new Error("Error al obtener los usuarios.");
+        }
+  
+        const data = await response.json();
+        console.log("Usuarios cargados:", data.obj);  // Log para verificar los datos
+        setUsuarios(Array.isArray(data.obj) ? data.obj : []);
+      } catch (error: any) {
+        console.error("Error al cargar los usuarios:", error);
+        setError(error.message || "Hubo un problema al cargar los usuarios.");
+      }
+    };
+
+    obtenerUsuarios();
+  }, []);
+  
+  useEffect(() => {
+    console.log("Estado de usuarios actualizado:", usuarios);
+  }, [usuarios]);
+  
+  const obtenerNombreUsuario = (id: number) => {
+    console.log("Usuarios disponibles:", usuarios);
+    const usuario = usuarios.find((usuario) => usuario.id === id);
+    return usuario ? usuario.nombreUsuario : "No definido";
+  };
+  
   const filtrarSolicitudes = (): Solicitud[] => {
     let filtradas = solicitudes;
 
@@ -122,11 +197,11 @@ const GestionSolicitudes: React.FC = () => {
       printWindow.document.write(`<h2>Solicitud ID: ${solicitud.id}</h2>`);
       printWindow.document.write(`<p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>`);
       printWindow.document.write(`<p><strong>Fecha de Solicitud:</strong> ${solicitud.fechaSolicitud}</p>`);
-      printWindow.document.write(`<p><strong>Área Solicitante:</strong> ${solicitud.areaSolicitante}</p>`);
+      printWindow.document.write(`<p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>`);
       printWindow.document.write(`<p><strong>Tipo de Solicitud:</strong> ${solicitud.tipoSolicitud}</p>`);
       printWindow.document.write(`<p><strong>Estado:</strong> ${solicitud.estado}</p>`);
-      printWindow.document.write(`<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`);
-      printWindow.document.write(`<p><strong>Usuario Solicitante:</strong> ${solicitud.usuarioSolicitante}</p>`);
+      printWindow.document.write(`<p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>`);
+      printWindow.document.write(`<p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>`);
       printWindow.document.write("</body></html>");
       printWindow.document.close();
       printWindow.print();
@@ -177,7 +252,7 @@ const GestionSolicitudes: React.FC = () => {
             <th>Usuario Solicitante</th>
             <th>Tipo de Solicitud</th>
             <th>Estado</th>
-            <th>Observaciones</th>
+            <th>Descripción de Servicio</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -187,11 +262,11 @@ const GestionSolicitudes: React.FC = () => {
               <td>{solicitud.id}</td>
               <td>{solicitud.numeroDeSerie}</td>
               <td>{solicitud.fechaSolicitud}</td>
-              <td>{solicitud.areaSolicitante}</td>
-              <td>{solicitud.usuarioSolicitante}</td>
+              <td>{obtenerNombreArea(solicitud.areaSolicitante)}</td>
+              <td>{obtenerNombreUsuario(solicitud.usuarioSolicitante)}</td>
               <td>{solicitud.tipoSolicitud}</td>
               <td>{solicitud.estado}</td>
-              <td>{solicitud.observaciones}</td>
+              <td>{solicitud.descripcionServicio}</td>
               <td className="d-flex justify-content-between">
                 <button
                   className="btn btn-success me-2"
