@@ -84,7 +84,7 @@ const GestionSolicitudes: React.FC = () => {
         if (!response.ok) {
           throw new Error("Error al obtener las áreas.");
         }
-  
+
         const data = await response.json();
         console.log("Áreas cargadas:", data.catAreas);  // Log para verificar los datos
         setAreas(Array.isArray(data.catAreas) ? data.catAreas : []);
@@ -93,7 +93,7 @@ const GestionSolicitudes: React.FC = () => {
         setError(error.message || "Hubo un problema al cargar las áreas.");
       }
     };
-  
+
     obtenerAreas();
   }, []);
 
@@ -104,8 +104,8 @@ const GestionSolicitudes: React.FC = () => {
     const area = areas.find((area) => area.idArea === id);
     return area ? area.nombreArea : "No definida";
   };
-  
-  
+
+
   useEffect(() => {
     const obtenerUsuarios = async () => {
       try {
@@ -113,34 +113,34 @@ const GestionSolicitudes: React.FC = () => {
         if (!response.ok) {
           throw new Error("Error al obtener los usuarios.");
         }
-  
+
         const data = await response.json();
         console.log("Usuarios cargados:", data.obj);  // Log para verificar los datos
-  
+
         // Filtrar solo los usuarios con rol "Usuario"
         const usuariosFiltrados = data.obj.filter((usuario: Usuario) => usuario.rol === "Usuario");
-  
+
         setUsuarios(usuariosFiltrados);
       } catch (error: any) {
         console.error("Error al cargar los usuarios:", error);
         setError(error.message || "Hubo un problema al cargar los usuarios.");
       }
     };
-  
+
     obtenerUsuarios();
   }, []);
-  
-  
+
+
   useEffect(() => {
     console.log("Estado de usuarios actualizado:", usuarios);
   }, [usuarios]);
-  
+
   const obtenerNombreUsuario = (id: number) => {
     console.log("Usuarios disponibles:", usuarios);
     const usuario = usuarios.find((usuario) => usuario.id === id);
     return usuario ? usuario.nombreUsuario : "No definido";
   };
-  
+
   const filtrarSolicitudes = (): Solicitud[] => {
     let filtradas = solicitudes;
 
@@ -181,24 +181,43 @@ const GestionSolicitudes: React.FC = () => {
   const aceptarSolicitud = (id: number) => navigate(`/aprobar-solicitud/${id}`);
   const rechazarSolicitud = (id: number) => navigate(`/rechazar-solicitud/${id}`);
   const eliminarSolicitud = async (id: number) => {
-    try {
-      const usuarioId = parseInt(localStorage.getItem("idUsuario") || "0");
+    console.log("ID de solicitud a eliminar:", id);
 
-      const response = await fetch(
-        `https://localhost:7094/api/usuario/EliminarSolicitudAdmin?idSolicitud=${id}&usuarioId=${usuarioId}`,
-        { method: "DELETE" }
-      );
+    const confirmar = window.confirm("¿Estás seguro de que deseas eliminar la solicitud?");
 
-      if (!response.ok) {
-        throw new Error("Error al eliminar la solicitud.");
+    if (confirmar) {
+      try {
+        // Obtén el usuarioId desde localStorage de manera más confiable
+        const usuarioIdStr = localStorage.getItem("idUsuario");
+        const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr) : 0; // Si no está disponible, se asigna 0.
+
+        if (usuarioId === 0) {
+          console.error("No se encontró el usuarioId en localStorage.");
+          setError("No se encontró el usuarioId en localStorage.");
+          return;
+        }
+
+        console.log("ID de usuario actual:", usuarioId);
+
+        const response = await fetch(
+          `https://localhost:7094/api/usuario/EliminarSolicitudAdmin?idSolicitud=${id}&usuarioId=${usuarioId}`,
+          { method: "DELETE" }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al eliminar la solicitud.");
+        }
+
+        // Actualiza el estado de las solicitudes después de la eliminación
+        setSolicitudes(solicitudes.filter((solicitud) => solicitud.id !== id));
+      } catch (error: any) {
+        console.error("Error al eliminar la solicitud:", error);
+        setError(error.message || "Hubo un problema al eliminar la solicitud.");
       }
 
-      setSolicitudes(solicitudes.filter((solicitud) => solicitud.id !== id));
-    } catch (error: any) {
-      console.error("Error al eliminar la solicitud:", error);
-      setError(error.message || "Hubo un problema al eliminar la solicitud.");
     }
   };
+
 
   const imprimirSolicitud = (solicitud: Solicitud) => {
     const printWindow = window.open("", "", "height=600,width=800");

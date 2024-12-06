@@ -57,20 +57,26 @@ const SolicitudesPorUsuario: React.FC = () => {
 
   // Función para eliminar una solicitud
   const eliminarSolicitud = async (id: number) => {
-    try {
-      const response = await fetch(`https://localhost:7094/api/usuario/EliminarSolicitud?idSolicitud=${id}&usuarioId=${usuarioSolicitanteID}`, {
-        method: 'DELETE',
-      });
 
-      if (!response.ok) {
-        throw new Error('Error al eliminar la solicitud.');
+    const confirmar = window.confirm('¿Estás seguro de que deseas eliminar esta solicitud?');
+
+    if (confirmar) {
+      try {
+        const response = await fetch(`https://localhost:7094/api/usuario/EliminarSolicitud?idSolicitud=${id}&usuarioId=${usuarioSolicitanteID}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al eliminar la solicitud.');
+        }
+
+        // Si la eliminación fue exitosa, actualizar la lista de solicitudes
+        setSolicitudes(solicitudes.filter((solicitud) => solicitud.id !== id));
+      } catch (error: any) {
+        console.error('Error al eliminar la solicitud:', error);
+        setError(error.message || 'Hubo un problema al eliminar la solicitud.');
       }
 
-      // Si la eliminación fue exitosa, actualizar la lista de solicitudes
-      setSolicitudes(solicitudes.filter((solicitud) => solicitud.id !== id));
-    } catch (error: any) {
-      console.error('Error al eliminar la solicitud:', error);
-      setError(error.message || 'Hubo un problema al eliminar la solicitud.');
     }
   };
 

@@ -27,9 +27,17 @@ const NavBar: React.FC = () => {
   }, []); // Solo se ejecuta al montar el componente
 
   const manejarCerrarSesion = () => {
+
+    const confirmar = window.confirm("¿Estás seguro de cerrar sesión?");
+
+    if (confirmar) {
+
     localStorage.removeItem("usuario"); // Eliminar datos del localStorage
     localStorage.removeItem("rol"); // Eliminar el rol del localStorage
     navigate("/login"); // Redirigir al login
+    
+    }
+  
   };
 
   const manejarNavegacion = () => {
