@@ -20,6 +20,7 @@ interface Area {
 interface Usuario {
   id: number;
   nombreUsuario: string;
+  rol: string;
 }
 
 const GestionSolicitudes: React.FC = () => {
@@ -28,6 +29,7 @@ const GestionSolicitudes: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [error, setError] = useState<string>("");
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
+  const [filtroUsuario, setFiltroUsuario] = useState<number | null>(null); // Filtro de usuario
   const [ordenFecha, setOrdenFecha] = useState<"asc" | "desc" | null>(null);
   const [paginaActual, setPaginaActual] = useState(1);
   const solicitudesPorPagina = 10; // Número de elementos por página
@@ -104,7 +106,6 @@ const GestionSolicitudes: React.FC = () => {
   };
   
   
-  
   useEffect(() => {
     const obtenerUsuarios = async () => {
       try {
@@ -115,15 +116,20 @@ const GestionSolicitudes: React.FC = () => {
   
         const data = await response.json();
         console.log("Usuarios cargados:", data.obj);  // Log para verificar los datos
-        setUsuarios(Array.isArray(data.obj) ? data.obj : []);
+  
+        // Filtrar solo los usuarios con rol "Usuario"
+        const usuariosFiltrados = data.obj.filter((usuario: Usuario) => usuario.rol === "Usuario");
+  
+        setUsuarios(usuariosFiltrados);
       } catch (error: any) {
         console.error("Error al cargar los usuarios:", error);
         setError(error.message || "Hubo un problema al cargar los usuarios.");
       }
     };
-
+  
     obtenerUsuarios();
   }, []);
+  
   
   useEffect(() => {
     console.log("Estado de usuarios actualizado:", usuarios);
@@ -140,6 +146,10 @@ const GestionSolicitudes: React.FC = () => {
 
     if (filtroEstado) {
       filtradas = filtradas.filter((solicitud) => solicitud.estado === filtroEstado);
+    }
+
+    if (filtroUsuario) {
+      filtradas = filtradas.filter((solicitud) => solicitud.usuarioSolicitante === filtroUsuario);
     }
 
     if (ordenFecha) {
@@ -226,6 +236,21 @@ const GestionSolicitudes: React.FC = () => {
             <option value="Solicitada">Solicitada</option>
             <option value="Atendida">Atendida</option>
             <option value="Rechazada">Rechazada</option>
+          </select>
+        </div>
+        <div>
+          <label className="form-label">Filtrar por Usuario:</label>
+          <select
+            className="form-select"
+            value={filtroUsuario || ""}
+            onChange={(e) => setFiltroUsuario(parseInt(e.target.value) || null)}
+          >
+            <option value="">Todos</option>
+            {usuarios.map((usuario) => (
+              <option key={usuario.id} value={usuario.id}>
+                {usuario.nombreUsuario}
+              </option>
+            ))}
           </select>
         </div>
         <div>
