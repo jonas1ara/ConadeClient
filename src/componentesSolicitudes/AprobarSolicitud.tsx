@@ -10,17 +10,30 @@ interface Solicitud {
     observaciones: string;
     areaSolicitante: number;
     descripcionServicio: string;
+    usuarioSolicitante: number; // Para relacionar con el ID del usuario
+}
+
+interface Area {
+    idArea: number;
+    nombreArea: string;
+}
+
+interface Usuario {
+    id: number;
+    nombreUsuario: string;
 }
 
 const AprobarSolicitud: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
-    const [observaciones, setObservaciones] = useState<string>(""); // Campo adicional para observaciones
+    const [areas, setAreas] = useState<Area[]>([]);
+    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+    const [observaciones, setObservaciones] = useState<string>("");
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        const obtenerSolicitudes = async () => {
+        const obtenerSolicitud = async () => {
             try {
                 const areaId = parseInt(localStorage.getItem("areaId") || "0");
 
@@ -36,7 +49,7 @@ const AprobarSolicitud: React.FC = () => {
                         url = `https://localhost:7094/api/UsoInmobiliario/ObtenerPorId/${id}`;
                         break;
                     case 4:
-                        url = `https://localhost:7094/api/Mantenimiento/Obtener/${id}`;
+                        url = `https://localhost:7094/api/Mantenimiento/ObtenerPorId/${id}`;
                         break;
                     default:
                         throw new Error("Área no válida o no definida.");
@@ -44,107 +57,206 @@ const AprobarSolicitud: React.FC = () => {
 
                 const response = await fetch(url);
                 if (!response.ok) {
-                    throw new Error("Error al obtener las solicitudes.");
+                    throw new Error("Error al obtener la solicitud.");
                 }
 
                 const data = await response.json();
-                if (data && data.areaSolicitante) {
-                    setSolicitud(data);
-                } else {
-                    throw new Error("La respuesta de la API no contiene la solicitud esperada.");
-                }
+                setSolicitud(data);
             } catch (error: any) {
                 console.error("Error al cargar la solicitud:", error);
                 setError(error.message || "Hubo un problema al cargar la solicitud.");
             }
         };
 
-        obtenerSolicitudes();
+        const obtenerAreas = async () => {
+            try {
+                const response = await fetch("https://localhost:7094/api/CatArea/Listar");
+                if (!response.ok) {
+                    throw new Error("Error al obtener las áreas.");
+                }
+                const data = await response.json();
+                setAreas(Array.isArray(data.catAreas) ? data.catAreas : []);
+            } catch (error: any) {
+                console.error("Error al cargar las áreas:", error);
+                setError(error.message || "Hubo un problema al cargar las áreas.");
+            }
+        };
+
+        const obtenerUsuarios = async () => {
+            try {
+                const response = await fetch("https://localhost:7094/api/Usuario/Listar");
+                if (!response.ok) {
+                    throw new Error("Error al obtener los usuarios.");
+                }
+                const data = await response.json();
+                setUsuarios(Array.isArray(data.obj) ? data.obj : []);
+            } catch (error: any) {
+                console.error("Error al cargar los usuarios:", error);
+                setError(error.message || "Hubo un problema al cargar los usuarios.");
+            }
+        };
+
+        obtenerSolicitud();
+        obtenerAreas();
+        obtenerUsuarios();
     }, [id]);
+
+    const obtenerNombreArea = (id: number) => {
+        const area = areas.find((area) => area.idArea === id);
+        return area ? area.nombreArea : "No definida";
+    };
+
+    const obtenerNombreUsuario = (id: number) => {
+        const usuario = usuarios.find((usuario) => usuario.id === id);
+        return usuario ? usuario.nombreUsuario : "No definido";
+    };
 
     const aprobarSolicitud = async () => {
         try {
-            const response = await fetch(`https://localhost:7094/api/Usuario/Aprobar/${id}`, {
+            if (!solicitud) {
+                setError("No se ha cargado la solicitud.");
+                return;
+            }
+    
+            if (solicitud.estado.toLowerCase() === "atendida") {
+                setError("La solicitud ya ha sido atendida.");
+                return;
+            }
+
+            // Obtén el usuarioId desde localStorage de manera más confiable
+            const usuarioIdStr = localStorage.getItem("idUsuario");
+            const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr) : 0; // Si no está disponible, se asigna 0.
+    
+            // Verificar que los datos a enviar son correctos
+            console.log("Solicitud a aprobar:", solicitud);
+            console.log("Usuario ID:", usuarioId);
+            console.log("Observaciones:", observaciones);
+    
+            const url = `https://localhost:7094/api/Usuario/AprobarRechazarSolicitud?idSolicitud=${solicitud.id}&usuarioId=${usuarioId}&accion=Atender&observaciones=${encodeURIComponent(observaciones)}`;
+    
+            console.log("URL de la solicitud:", url); // Verificar la URL que se está construyendo
+    
+            const response = await fetch(url, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ observaciones }), // Enviar las observaciones
             });
+    
             if (!response.ok) {
                 throw new Error("Error al aprobar la solicitud.");
             }
-
-            navigate("/");
+    
+            const data = await response.json();
+    
+            if (data.success) {
+                alert("La solicitud ha sido aprobada con éxito.");
+                navigate("/gestion-solicitudes");
+            } else {
+                setError(data.mensaje || "No se pudo aprobar la solicitud.");
+            }
         } catch (error: any) {
+            console.error("Error al aprobar la solicitud:", error);
             setError(error.message || "Hubo un problema al aprobar la solicitud.");
         }
     };
 
-    const imprimirSolicitud = () => {
-        if (solicitud) {
-            const printWindow = window.open('', '', 'height=600,width=800');
-            if (printWindow) {
-                printWindow.document.write('<html><head><title>Solicitud</title></head><body>');
-                printWindow.document.write(`<h2>Solicitud ID: ${solicitud.id}</h2>`);
-                printWindow.document.write(`<p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>`);
-                printWindow.document.write(`<p><strong>Fecha de Solicitud:</strong> ${solicitud.fechaSolicitud}</p>`);
-                printWindow.document.write(`<p><strong>Área Solicitante:</strong> ${solicitud.areaSolicitante}</p>`);
-                printWindow.document.write(`<p><strong>Tipo de Solicitud:</strong> ${solicitud.tipoSolicitud}</p>`);
-                printWindow.document.write(`<p><strong>Estado:</strong> ${solicitud.estado}</p>`);
-                printWindow.document.write(`<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`);
-                printWindow.document.write('</body></html>');
-                printWindow.document.close();
-                printWindow.print();
-            }
-        }
-    };
 
+    if (!solicitud) {
+        return <div>Cargando solicitud...</div>;
+    }
 
     return (
-        <div className="container mt-4">
+        <div className="mt-4">
             <h2 className="text-center mb-4">Aprobar Solicitud</h2>
-
             {error && <div className="alert alert-danger text-center">{error}</div>}
 
-            {solicitud ? (
-                <div>
-                    <p><strong>ID:</strong> {solicitud.id}</p>
-                    <p><strong>Número de Serie:</strong> {solicitud.numeroDeSerie}</p>
-                    <p><strong>Fecha de Solicitud:</strong> {solicitud.fechaSolicitud}</p>
-                    <p><strong>Área Solicitante:</strong> {solicitud.areaSolicitante}</p>
-                    <p><strong>Tipo de Solicitud:</strong> {solicitud.tipoSolicitud}</p>
-                    <p><strong>Estado:</strong> {solicitud.estado}</p>
-                    <p><strong>Observaciones:</strong> {solicitud.observaciones}</p>
+            <div className="mb-3">
+                <label className="form-label">Solicitud ID:</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={solicitud.id}
+                    readOnly
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Número de Serie:</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={solicitud.numeroDeSerie}
+                    readOnly
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Fecha de Solicitud:</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={solicitud.fechaSolicitud}
+                    readOnly
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Área Solicitante:</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={obtenerNombreArea(solicitud.areaSolicitante)}
+                    readOnly
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Usuario Solicitante:</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={obtenerNombreUsuario(solicitud.usuarioSolicitante)}
+                    readOnly
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Tipo de Solicitud:</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={solicitud.tipoSolicitud}
+                    readOnly
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Estado:</label>
+                <input
+                    type="text"
+                    className="form-control"
+                    value={solicitud.estado}
+                    readOnly
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Descripción de Servicio:</label>
+                <textarea
+                    className="form-control"
+                    value={solicitud.descripcionServicio}
+                    readOnly
+                />
+            </div>
 
-                    <div className="mb-3">
-                        <label htmlFor="observacionesInput" className="form-label">
-                            Agregar Observaciones:
-                        </label>
-                        <textarea
-                            id="observacionesInput"
-                            className="form-control"
-                            value={observaciones}
-                            onChange={(e) => setObservaciones(e.target.value)}
-                            rows={3}
-                        />
-                    </div>
+            <div className="mt-4">
+                <label className="form-label">Observaciones:</label>
+                <textarea
+                    className="form-control"
+                    value={observaciones}
+                    onChange={(e) => setObservaciones(e.target.value)}
+                ></textarea>
+            </div>
 
-                    <div className="d-flex justify-content-center">
-                        <button className="btn btn-success mx-2" onClick={aprobarSolicitud}>
-                            Aprobar Solicitud
-                        </button>
-                        <button className="btn btn-secondary mx-2" onClick={() => navigate("/gestion-solicitudes")}>
-                            Cancelar
-                        </button>
-                        <button className="btn btn-info mx-2" onClick={imprimirSolicitud}>
-                            Imprimir
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                <p>Cargando solicitud...</p>
-            )}
+            <div className="mt-3 d-flex justify-content-between">
+                <button className="btn btn-success" onClick={aprobarSolicitud}>
+                    Aprobar
+                </button>
+                <button className="btn btn-secondary" onClick={() => navigate("/gestion-solicitudes")}>
+                    Cancelar
+                </button>
+            </div>
         </div>
     );
 };
