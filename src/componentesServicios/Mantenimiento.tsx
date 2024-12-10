@@ -276,11 +276,11 @@ const SolicitudServicioMantenimiento: React.FC = () => {
           </small>
         </div>
 
-        <div className="text-center">
-          <button type="submit" className="btn btn-primary me-2">
-            Guardar Solicitud
+        <div className="d-flex justify-content-between">
+          <button type="submit" className="btn btn-primary">
+            Enviar Solicitud
           </button>
-          <button type="button" className="btn btn-danger" onClick={manejarCancelar}>
+          <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
             Cancelar
           </button>
         </div>

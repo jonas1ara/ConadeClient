@@ -31,6 +31,7 @@ const RechazarSolicitud: React.FC = () => {
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
     const [observaciones, setObservaciones] = useState<string>("");
     const [error, setError] = useState<string>("");
+    const [isProcessing, setIsProcessing] = useState<boolean>(false); // Estado para controlar el procesamiento
 
     useEffect(() => {
         const obtenerSolicitud = async () => {
@@ -49,7 +50,7 @@ const RechazarSolicitud: React.FC = () => {
                         url = `https://localhost:7094/api/UsoInmobiliario/ObtenerPorId/${id}`;
                         break;
                     case 4:
-                        url = `https://localhost:7094/api/Mantenimiento/ObtenerPorId/${id}`;
+                        url = `https://localhost:7094/api/Mantenimiento/Obtener/${id}`;
                         break;
                     default:
                         throw new Error("Área no válida o no definida.");
@@ -112,14 +113,20 @@ const RechazarSolicitud: React.FC = () => {
     };
 
     const rechazarSolicitud = async () => {
+        if (isProcessing) return; // Si ya está en proceso, no hacemos nada
+
         try {
+            setIsProcessing(true); // Activamos el estado de procesamiento
+
             if (!solicitud) {
                 setError("No se ha cargado la solicitud.");
+                setIsProcessing(false); // Revertimos el estado de procesamiento
                 return;
             }
 
             if (solicitud.estado.toLowerCase() === "rechazada") {
                 setError("La solicitud ya ha sido rechazada.");
+                setIsProcessing(false); // Revertimos el estado de procesamiento
                 return;
             }
 
@@ -142,7 +149,6 @@ const RechazarSolicitud: React.FC = () => {
 
             // Si la respuesta no es exitosa, manejamos el error
             if (!response.ok) {
-                // Si el código de estado es 404 (No encontrado), mostramos el mensaje del JSON
                 if (response.status === 404) {
                     const data = await response.json();
                     setError(data.mensaje || "No se pudo rechazar la solicitud.");
@@ -161,9 +167,10 @@ const RechazarSolicitud: React.FC = () => {
         } catch (error: any) {
             console.error("Error al rechazar la solicitud:", error);
             setError(error.message || "Hubo un problema al rechazar la solicitud.");
+        } finally {
+            setIsProcessing(false); // Revertimos el estado de procesamiento después de completar la operación
         }
     };
-
 
     if (!solicitud) {
         return <div>Cargando solicitud...</div>;
@@ -238,29 +245,23 @@ const RechazarSolicitud: React.FC = () => {
                 />
             </div>
             <div className="mb-3">
-                <label className="form-label">Descripción de Servicio:</label>
-                <textarea
-                    className="form-control"
-                    value={solicitud.descripcionServicio}
-                    readOnly
-                />
-            </div>
-
-            <div className="mt-4">
                 <label className="form-label">Observaciones:</label>
                 <textarea
                     className="form-control"
+                    rows={3}
                     value={observaciones}
                     onChange={(e) => setObservaciones(e.target.value)}
-                ></textarea>
+                />
             </div>
 
-            <div className="mt-3 d-flex justify-content-between">
-                <button className="btn btn-danger" onClick={rechazarSolicitud}>
-                    Rechazar
-                </button>
-                <button className="btn btn-secondary" onClick={() => navigate("/gestion-solicitudes")}>
-                    Cancelar
+            <div className="d-flex justify-content-center mt-4">
+                <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={rechazarSolicitud}
+                    disabled={isProcessing} // Deshabilitar el botón mientras se procesa
+                >
+                    {isProcessing ? "Procesando..." : "Rechazar Solicitud"}
                 </button>
             </div>
         </div>

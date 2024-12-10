@@ -31,6 +31,7 @@ const AprobarSolicitud: React.FC = () => {
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
     const [observaciones, setObservaciones] = useState<string>("");
     const [error, setError] = useState<string>("");
+    const [isProcessing, setIsProcessing] = useState<boolean>(false); // Nuevo estado para controlar el proceso de aprobación
 
     useEffect(() => {
         const obtenerSolicitud = async () => {
@@ -49,7 +50,7 @@ const AprobarSolicitud: React.FC = () => {
                         url = `https://localhost:7094/api/UsoInmobiliario/ObtenerPorId/${id}`;
                         break;
                     case 4:
-                        url = `https://localhost:7094/api/Mantenimiento/ObtenerPorId/${id}`;
+                        url = `https://localhost:7094/api/Mantenimiento/Obtener/${id}`;
                         break;
                     default:
                         throw new Error("Área no válida o no definida.");
@@ -117,35 +118,38 @@ const AprobarSolicitud: React.FC = () => {
                 setError("No se ha cargado la solicitud.");
                 return;
             }
-    
+
             if (solicitud.estado.toLowerCase() === "atendida") {
                 setError("La solicitud ya ha sido atendida.");
                 return;
             }
 
+            // Establecer isProcessing a true mientras se procesa la solicitud
+            setIsProcessing(true);
+
             // Obtén el usuarioId desde localStorage de manera más confiable
             const usuarioIdStr = localStorage.getItem("idUsuario");
             const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr) : 0; // Si no está disponible, se asigna 0.
-    
+
             // Verificar que los datos a enviar son correctos
             console.log("Solicitud a aprobar:", solicitud);
             console.log("Usuario ID:", usuarioId);
             console.log("Observaciones:", observaciones);
-    
+
             const url = `https://localhost:7094/api/Usuario/AprobarRechazarSolicitud?idSolicitud=${solicitud.id}&usuarioId=${usuarioId}&accion=Atender&observaciones=${encodeURIComponent(observaciones)}`;
-    
+
             console.log("URL de la solicitud:", url); // Verificar la URL que se está construyendo
-    
+
             const response = await fetch(url, {
                 method: "POST",
             });
-    
+
             if (!response.ok) {
                 throw new Error("Error al aprobar la solicitud.");
             }
-    
+
             const data = await response.json();
-    
+
             if (data.success) {
                 alert("La solicitud ha sido aprobada con éxito.");
                 navigate("/gestion-solicitudes");
@@ -155,9 +159,11 @@ const AprobarSolicitud: React.FC = () => {
         } catch (error: any) {
             console.error("Error al aprobar la solicitud:", error);
             setError(error.message || "Hubo un problema al aprobar la solicitud.");
+        } finally {
+            // Al finalizar el proceso, poner isProcessing a false
+            setIsProcessing(false);
         }
     };
-
 
     if (!solicitud) {
         return <div>Cargando solicitud...</div>;
@@ -250,10 +256,17 @@ const AprobarSolicitud: React.FC = () => {
             </div>
 
             <div className="mt-3 d-flex justify-content-between">
-                <button className="btn btn-success" onClick={aprobarSolicitud}>
-                    Aprobar
+                <button
+                    className="btn btn-success"
+                    onClick={aprobarSolicitud}
+                    disabled={isProcessing} // Deshabilitar mientras se procesa
+                >
+                    {isProcessing ? "Procesando..." : "Aprobar Solicitud"}
                 </button>
-                <button className="btn btn-secondary" onClick={() => navigate("/gestion-solicitudes")}>
+                <button
+                    className="btn btn-danger"
+                    onClick={() => navigate("/gestion-solicitudes")}
+                >
                     Cancelar
                 </button>
             </div>
