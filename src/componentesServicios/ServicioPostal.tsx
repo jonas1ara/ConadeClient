@@ -125,9 +125,12 @@ const SolicitudServicioPostal: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error al crear la solicitud:", errorData);
-        setError(errorData.title || "Hubo un error al crear la solicitud.");
-        if (errorData.errors) {
-          setError(JSON.stringify(errorData.errors));
+
+        // Mostrar los mensajes de error específicos
+        if (errorData.mensaje) {
+          setError(errorData.mensaje);
+        } else {
+          setError("Hubo un error al crear la solicitud.");
         }
         return;
       }
@@ -266,7 +269,7 @@ const SolicitudServicioPostal: React.FC = () => {
             Fecha de Envío
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaEnvio"
             name="fechaEnvio"
@@ -274,9 +277,6 @@ const SolicitudServicioPostal: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
-          </small>
         </div>
 
         <div className="mb-3">
@@ -284,7 +284,7 @@ const SolicitudServicioPostal: React.FC = () => {
             Fecha de Recepción Máxima
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaRecepcionMaxima"
             name="fechaRecepcionMaxima"
@@ -292,9 +292,6 @@ const SolicitudServicioPostal: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-07).
-          </small>
         </div>
 
         <div className="d-flex justify-content-between">

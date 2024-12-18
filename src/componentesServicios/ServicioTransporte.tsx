@@ -126,13 +126,16 @@ const SolicitudServicioTransporte: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error al crear la solicitud:", errorData);
-        setError(errorData.title || "Hubo un error al crear la solicitud.");
-        if (errorData.errors) {
-          setError(JSON.stringify(errorData.errors));
+
+        // Mostrar los mensajes de error específicos
+        if (errorData.mensaje) {
+          setError(errorData.mensaje);
+        } else {
+          setError("Hubo un error al crear la solicitud.");
         }
         return;
       }
-
+      
       setSuccessMessage("Solicitud enviada exitosamente.");
       setNumeroDeSolicitud("");
       setAreaSolicitante("");
@@ -282,7 +285,7 @@ const SolicitudServicioTransporte: React.FC = () => {
             Fecha de Transporte
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaTransporte"
             name="fechaTransporte"
@@ -290,9 +293,6 @@ const SolicitudServicioTransporte: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
-          </small>
         </div>
 
         <div className="mb-3">
@@ -300,7 +300,7 @@ const SolicitudServicioTransporte: React.FC = () => {
             Fecha de Transporte de Vuelta
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaTransporteVuelta"
             name="fechaTransporteVuelta"
@@ -308,9 +308,6 @@ const SolicitudServicioTransporte: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
-          </small>
         </div>
 
         <div className="mb-3">

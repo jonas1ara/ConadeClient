@@ -129,9 +129,12 @@ const SolicitudUsoInmobiliario: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error al crear la solicitud:", errorData);
-        setError(errorData.title || "Hubo un error al crear la solicitud.");
-        if (errorData.errors) {
-          setError(JSON.stringify(errorData.errors));
+
+        // Mostrar los mensajes de error específicos
+        if (errorData.mensaje) {
+          setError(errorData.mensaje);
+        } else {
+          setError("Hubo un error al crear la solicitud.");
         }
         return;
       }
@@ -250,7 +253,7 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             Fecha de Inicio
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaInicio"
             name="fechaInicio"
@@ -258,9 +261,6 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
-          </small>
         </div>
 
         <div className="mb-3">
@@ -268,7 +268,7 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             Fecha de Fin
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaFin"
             name="fechaFin"
@@ -276,9 +276,6 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
-          </small>
         </div>
 
         <div className="mb-3">
@@ -286,7 +283,7 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             Horario de Inicio
           </label>
           <input
-            type="text"
+            type="time"
             className="form-control"
             id="horarioInicio"
             name="horarioInicio"
@@ -305,7 +302,7 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             Horario de Fin
           </label>
           <input
-            type="text"
+            type="time"
             className="form-control"
             id="horarioFin"
             name="horarioFin"

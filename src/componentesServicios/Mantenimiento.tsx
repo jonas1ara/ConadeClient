@@ -112,9 +112,12 @@ const SolicitudServicioMantenimiento: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error al crear la solicitud:", errorData);
-        setError(errorData.title || "Hubo un error al crear la solicitud.");
-        if (errorData.errors) {
-          setError(JSON.stringify(errorData.errors));
+
+        // Mostrar los mensajes de error específicos
+        if (errorData.mensaje) {
+          setError(errorData.mensaje);
+        } else {
+          setError("Hubo un error al crear la solicitud.");
         }
         return;
       }
@@ -251,7 +254,7 @@ const SolicitudServicioMantenimiento: React.FC = () => {
             Fecha de Inicio
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaInicio"
             name="fechaInicio"
@@ -259,17 +262,14 @@ const SolicitudServicioMantenimiento: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
-          </small>
         </div>
 
         <div className="mb-3">
           <label htmlFor="fechaFin" className="form-label">
-            Fecha de Fin
+            Fecha de Finalización
           </label>
           <input
-            type="text"
+            type="date"
             className="form-control"
             id="fechaFin"
             name="fechaFin"
@@ -277,10 +277,8 @@ const SolicitudServicioMantenimiento: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la fecha en formato <strong>YYYY-MM-DD</strong> (por ejemplo, 2024-12-06).
-          </small>
         </div>
+
 
         <div className="d-flex justify-content-between">
           <button type="submit" className="btn btn-primary">
