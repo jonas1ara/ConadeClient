@@ -1,4 +1,3 @@
-import React from "react";
 import UseTheme from './hooks/UseTheme';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./componentesUsuarios/Login";
@@ -20,14 +19,6 @@ function App() {
   // Función para verificar si el usuario está autenticado
   const isAuthenticated = () => {
     return localStorage.getItem("usuario") !== null;
-  };
-
-  // Obtener el nombre de usuario desde localStorage
-  const usuario = localStorage.getItem("usuario") || "";
-
-  // Función para manejar el cierre de sesión
-  const handleLogout = () => {
-    localStorage.removeItem("usuario"); // Eliminar del localStorage
   };
 
   return (

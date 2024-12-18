@@ -138,6 +138,9 @@ const SolicitudServicioPostal: React.FC = () => {
       setDescripcionServicio("");
       setFechaEnvio("");
       setFechaRecepcionMaxima("");
+
+      navigate("/panel-principal");
+
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
     }
@@ -167,6 +170,7 @@ const SolicitudServicioPostal: React.FC = () => {
             id="numeroDeSolicitud"
             name="numeroDeSolicitud"
             value={numeroDeSolicitud}
+            disabled
             readOnly
           />
         </div>
@@ -181,6 +185,7 @@ const SolicitudServicioPostal: React.FC = () => {
             id="fechaSolicitud"
             name="fechaSolicitud"
             value={fechaSolicitud}
+            disabled
             readOnly
           />
         </div>
@@ -216,6 +221,7 @@ const SolicitudServicioPostal: React.FC = () => {
             id="tipoSolicitud"
             name="tipoSolicitud"
             value="Servicio Postal"
+            disabled
             readOnly
           />
         </div>

@@ -11,6 +11,7 @@ const PanelPrincipal: React.FC = () => {
     const usuarioGuardado = localStorage.getItem("usuario");
     if (usuarioGuardado) {
       setUsuario(usuarioGuardado); // Actualizamos el estado con el nombre del usuario
+      console.log(usuario);
     } else {
       // Si no hay usuario en el localStorage, redirigimos al login
       navigate("/login");

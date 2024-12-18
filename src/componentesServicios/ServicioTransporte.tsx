@@ -142,6 +142,9 @@ const SolicitudServicioTransporte: React.FC = () => {
       setFechaTransporteVuelta("");
       setDescripcion("");
       setObservaciones("");
+
+      navigate("/panel-principal");
+
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
     }
@@ -169,6 +172,7 @@ const SolicitudServicioTransporte: React.FC = () => {
             id="numeroDeSolicitud"
             name="numeroDeSolicitud"
             value={numeroDeSolicitud}
+            disabled
             readOnly
           />
         </div>
@@ -183,6 +187,7 @@ const SolicitudServicioTransporte: React.FC = () => {
             id="fechaSolicitud"
             name="fechaSolicitud"
             value={fechaSolicitud}
+            disabled
             readOnly
           />
         </div>
@@ -218,6 +223,7 @@ const SolicitudServicioTransporte: React.FC = () => {
             id="tipoSolicitud"
             name="tipoSolicitud"
             value="Servicio Transporte"
+            disabled
             readOnly
           />
         </div>

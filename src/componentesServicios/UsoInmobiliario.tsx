@@ -145,6 +145,9 @@ const SolicitudUsoInmobiliario: React.FC = () => {
       setHorarioFin("");
       setDescripcion("");
       setObservaciones("");
+
+      navigate("/panel-principal");
+
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
     }
@@ -172,6 +175,7 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             id="numeroDeSolicitud"
             name="numeroDeSolicitud"
             value={numeroDeSolicitud}
+            disabled
             readOnly
           />
         </div>
@@ -186,6 +190,7 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             id="fechaSolicitud"
             name="fechaSolicitud"
             value={fechaSolicitud}
+            disabled
             readOnly
           />
         </div>
@@ -221,6 +226,7 @@ const SolicitudUsoInmobiliario: React.FC = () => {
             id="tipoSolicitud"
             name="tipoSolicitud"
             value="Uso Inmobiliario"
+            disabled
             readOnly
           />
         </div>

@@ -128,6 +128,9 @@ const SolicitudServicioMantenimiento: React.FC = () => {
       setDescripcionServicio("");
       setFechaInicio("");
       setFechaFin("");
+
+      navigate("/panel-principal");
+
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
     }
@@ -155,6 +158,7 @@ const SolicitudServicioMantenimiento: React.FC = () => {
             id="numeroDeSolicitud"
             name="numeroDeSolicitud"
             value={numeroDeSerie}
+            disabled
             readOnly
           />
         </div>
@@ -169,6 +173,7 @@ const SolicitudServicioMantenimiento: React.FC = () => {
             id="fechaSolicitud"
             name="fechaSolicitud"
             value={fechaSolicitud}
+            disabled
             readOnly
           />
         </div>
@@ -204,6 +209,7 @@ const SolicitudServicioMantenimiento: React.FC = () => {
             id="tipoSolicitud"
             name="tipoSolicitud"
             value="Mantenimiento"
+            disabled
             readOnly
           />
         </div>

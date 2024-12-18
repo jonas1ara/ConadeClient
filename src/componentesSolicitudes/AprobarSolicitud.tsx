@@ -32,6 +32,7 @@ const AprobarSolicitud: React.FC = () => {
     const [observaciones, setObservaciones] = useState<string>("");
     const [error, setError] = useState<string>("");
     const [isProcessing, setIsProcessing] = useState<boolean>(false); // Nuevo estado para controlar el proceso de aprobación
+    const [success, setSuccess] = useState<string>(""); // Estado para manejar el mensaje de éxito
 
     useEffect(() => {
         const obtenerSolicitud = async () => {
@@ -114,6 +115,7 @@ const AprobarSolicitud: React.FC = () => {
 
     const aprobarSolicitud = async () => {
         try {
+            setError(""); // Limpiar el mensaje de error
             if (!solicitud) {
                 setError("No se ha cargado la solicitud.");
                 return;
@@ -121,6 +123,12 @@ const AprobarSolicitud: React.FC = () => {
 
             if (solicitud.estado.toLowerCase() === "atendida") {
                 setError("La solicitud ya ha sido atendida.");
+                return;
+            }
+
+            // Validación de que las observaciones no estén vacías
+            if (!observaciones.trim()) {
+                setError("El campo observaciones es obligatorio.");
                 return;
             }
 
@@ -144,17 +152,24 @@ const AprobarSolicitud: React.FC = () => {
                 method: "POST",
             });
 
+            // Si la respuesta no es exitosa, manejamos el error
             if (!response.ok) {
-                throw new Error("Error al aprobar la solicitud.");
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                alert("La solicitud ha sido aprobada con éxito.");
-                navigate("/gestion-solicitudes");
+                if (response.status === 404) {
+                    const data = await response.json();
+                    setError(data.mensaje || "No se pudo rechazar la solicitud.");
+                } else {
+                    throw new Error("Hubo un problema al rechazar la solicitud.");
+                }
             } else {
-                setError(data.mensaje || "No se pudo aprobar la solicitud.");
+                const data = await response.json();
+
+                if (data.success) {
+                    setSuccess(data.mensaje || "La solicitud ha sido aprobada con éxito."); // Establecer el mensaje de éxito
+
+                    setTimeout(() => navigate("/gestion-solicitudes"), 4000);
+                } else {
+                    setError(data.mensaje || "No se pudo rechazar la solicitud.");
+                }
             }
         } catch (error: any) {
             console.error("Error al aprobar la solicitud:", error);
@@ -165,6 +180,7 @@ const AprobarSolicitud: React.FC = () => {
         }
     };
 
+
     if (!solicitud) {
         return <div>Cargando solicitud...</div>;
     }
@@ -173,6 +189,7 @@ const AprobarSolicitud: React.FC = () => {
         <div className="mt-4">
             <h2 className="text-center mb-4">Aprobar Solicitud</h2>
             {error && <div className="alert alert-danger text-center">{error}</div>}
+            {success && <div className="alert alert-success text-center">{success}</div>} {/* Mostrar mensaje de éxito */}
 
             <div className="mb-3">
                 <label className="form-label">Solicitud ID:</label>
@@ -180,6 +197,7 @@ const AprobarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.id}
+                    disabled
                     readOnly
                 />
             </div>
@@ -189,6 +207,7 @@ const AprobarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.numeroDeSerie}
+                    disabled
                     readOnly
                 />
             </div>
@@ -198,6 +217,7 @@ const AprobarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.fechaSolicitud}
+                    disabled
                     readOnly
                 />
             </div>
@@ -207,6 +227,7 @@ const AprobarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={obtenerNombreArea(solicitud.areaSolicitante)}
+                    disabled
                     readOnly
                 />
             </div>
@@ -216,6 +237,7 @@ const AprobarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={obtenerNombreUsuario(solicitud.usuarioSolicitante)}
+                    disabled
                     readOnly
                 />
             </div>
@@ -225,6 +247,7 @@ const AprobarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.tipoSolicitud}
+                    disabled
                     readOnly
                 />
             </div>
@@ -234,6 +257,7 @@ const AprobarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.estado}
+                    disabled
                     readOnly
                 />
             </div>
@@ -242,6 +266,7 @@ const AprobarSolicitud: React.FC = () => {
                 <textarea
                     className="form-control"
                     value={solicitud.descripcionServicio}
+                    disabled
                     readOnly
                 />
             </div>
@@ -272,6 +297,6 @@ const AprobarSolicitud: React.FC = () => {
             </div>
         </div>
     );
-};
+}
 
 export default AprobarSolicitud;

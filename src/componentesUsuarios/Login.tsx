@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
@@ -6,50 +6,61 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [successMessage, setSuccessMessage] = useState<string>(""); // Estado para mensaje de éxito
+  const [successMessage, setSuccessMessage] = useState<string>(""); 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Si ya existe un usuario en el localStorage, navegamos
+    const storedUsername = localStorage.getItem("usuario");
+    const storedAreaId = localStorage.getItem("areaId");
+    const storedRol = localStorage.getItem("rol");
+
+    if (storedUsername && storedAreaId && storedRol) {
+      // Si ya hay un usuario en el localStorage, se redirige dependiendo de su rol
+      if (storedRol === "Admin") {
+        navigate("/gestion-solicitudes");
+      } else if (storedRol === "Usuario") {
+        navigate("/panel-principal");
+      }
+    }
+  }, [navigate]);
 
   const manejarLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccessMessage(""); // Limpiamos el mensaje de éxito antes de intentar el login
+    setSuccessMessage(""); 
     setIsLoading(true);
 
     try {
-      // Realizamos la petición de login
       const response = await fetch(
         `https://localhost:7094/api/Usuario/Login?nombreUsuario=${username}&contrasena=${password}`,
         {
-          method: "GET", // Usamos GET ya que estamos enviando los parámetros en la URL
+          method: "GET",
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Credenciales incorrectas");
-      }
-
       const data = await response.json();
 
-      // Asumimos que la respuesta tiene un campo `role` que determina a dónde redirigir
-      if (data.success) {
-        // Si el login es exitoso, verificamos el rol
-        const usuario = data.obj; // Asumiendo que la respuesta tiene el usuario con su rol
-        localStorage.setItem("usuario", usuario.nombreUsuario); // Guardamos el usuario en localStorage
-        localStorage.setItem("areaId", usuario.areaId); // Guardamos el areaId en localStorage
-        localStorage.setItem("rol", usuario.rol); // Guardamos el rol en localStorage
-        localStorage.setItem("idUsuario", usuario.id); // Guardamos el id del usuario en localStorage
-
-
-        if (usuario.rol === "Admin") {
-          setSuccessMessage("Bienvenido, Admin!"); // Mensaje de éxito para Admin
-          navigate("/gestion-solicitudes"); // Redirigimos al área de gestión de solicitudes
-        } else if (usuario.rol === "Usuario") {
-          setSuccessMessage("Bienvenido!"); // Mensaje de éxito para Usuario
-          navigate("/panel-principal"); // Redirigimos al panel principal del usuario
-        }
-      } else {
-        // Si el login no fue exitoso, mostramos el mensaje de error
+      if (!response.ok || !data.success) {
         setError(data.mensaje || "Credenciales incorrectas, intenta de nuevo.");
+        return;
+      }
+
+      if (data.success) {
+        const usuario = data.obj;
+        localStorage.setItem("usuario", usuario.nombreUsuario);
+        localStorage.setItem("areaId", usuario.areaId);
+        localStorage.setItem("rol", usuario.rol);
+        localStorage.setItem("idUsuario", usuario.id);
+
+        // Redirigir según el rol
+        if (usuario.rol === "Admin") {
+          setSuccessMessage("Bienvenido, Admin!");
+          navigate("/gestion-solicitudes");
+        } else if (usuario.rol === "Usuario") {
+          setSuccessMessage("Bienvenido!");
+          navigate("/panel-principal");
+        }
       }
     } catch (error: any) {
       setError("El usuario no existe en la base de datos.");
@@ -65,7 +76,7 @@ const Login: React.FC = () => {
           <h2 className="text-center">Iniciar Sesión</h2>
 
           {error && <div className="alert alert-danger text-center">{error}</div>}
-          {successMessage && <div className="alert alert-success text-center">{successMessage}</div>} {/* Mostrar mensaje de éxito */}
+          {successMessage && <div className="alert alert-success text-center">{successMessage}</div>} 
 
           <div className="mb-3">
             <label htmlFor="username" className="form-label">

@@ -23,10 +23,16 @@ const RegistroUsuario: React.FC = () => {
   ) => {
     const { name, value } = e.target;
 
+    // Convertir los campos 'nombre', 'apellidoPaterno', 'apellidoMaterno' a mayúsculas
+    const nuevoValor =
+      name === "nombre" || name === "apellidoPaterno" || name === "apellidoMaterno"
+        ? value.toUpperCase()
+        : value;
+
     // Aseguramos que el campo areaID se maneje como número y no como string
     setUsuario({
       ...usuario,
-      [name]: name === "areaID" ? parseInt(value, 10) : value,
+      [name]: name === "areaID" ? parseInt(nuevoValor, 10) : nuevoValor,
     });
   };
 
@@ -54,17 +60,17 @@ const RegistroUsuario: React.FC = () => {
         usuario.nombreUsuario
       )}&contrasena=${encodeURIComponent(
         usuario.contrasena
-      )}&rol=${encodeURIComponent(rolCapitalizado)}${
-        rolCapitalizado === "Admin" ? `&areaID=${usuario.areaID}` : ""
-      }`;
+      )}&rol=${encodeURIComponent(rolCapitalizado)}${rolCapitalizado === "Admin" ? `&areaID=${usuario.areaID}` : ""
+        }`;
 
       const response = await fetch(url, {
         method: "POST",
       });
 
       if (!response.ok) {
-        throw new Error("Hubo un error al crear el usuario");
-      
+        const data = await response.json();
+        throw new Error(data.mensaje); // Enviamos el mensaje de error recibido
+
       }
 
       setSuccessMessage("Usuario creado exitosamente");

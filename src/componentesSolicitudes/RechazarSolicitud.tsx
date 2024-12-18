@@ -32,6 +32,7 @@ const RechazarSolicitud: React.FC = () => {
     const [observaciones, setObservaciones] = useState<string>("");
     const [error, setError] = useState<string>("");
     const [isProcessing, setIsProcessing] = useState<boolean>(false); // Estado para controlar el procesamiento
+    const [success, setSuccess] = useState<string>(""); // Estado para manejar el mensaje de éxito
 
     useEffect(() => {
         const obtenerSolicitud = async () => {
@@ -113,11 +114,8 @@ const RechazarSolicitud: React.FC = () => {
     };
 
     const rechazarSolicitud = async () => {
-        if (isProcessing) return; // Si ya está en proceso, no hacemos nada
-
         try {
-            setIsProcessing(true); // Activamos el estado de procesamiento
-
+            setError(""); // Limpiamos el mensaje de error
             if (!solicitud) {
                 setError("No se ha cargado la solicitud.");
                 setIsProcessing(false); // Revertimos el estado de procesamiento
@@ -129,6 +127,14 @@ const RechazarSolicitud: React.FC = () => {
                 setIsProcessing(false); // Revertimos el estado de procesamiento
                 return;
             }
+
+            // Validación de que las observaciones no estén vacías
+            if (!observaciones.trim()) {
+                setError("El campo observaciones es obligatorio.");
+                return;
+            }
+
+            setIsProcessing(true); // Activamos el estado de procesamiento
 
             // Obtén el usuarioId desde localStorage de manera más confiable
             const usuarioIdStr = localStorage.getItem("idUsuario");
@@ -157,9 +163,11 @@ const RechazarSolicitud: React.FC = () => {
                 }
             } else {
                 const data = await response.json();
+
                 if (data.success) {
-                    alert("La solicitud ha sido rechazada");
-                    navigate("/gestion-solicitudes");
+                    setSuccess(data.mensaje || "La solicitud ha sido aprobada con éxito."); // Establecer el mensaje de éxito
+
+                    setTimeout(() => navigate("/gestion-solicitudes"), 4000);
                 } else {
                     setError(data.mensaje || "No se pudo rechazar la solicitud.");
                 }
@@ -180,6 +188,7 @@ const RechazarSolicitud: React.FC = () => {
         <div className="mt-4">
             <h2 className="text-center mb-4">Rechazar Solicitud</h2>
             {error && <div className="alert alert-danger text-center">{error}</div>}
+            {success && <div className="alert alert-success text-center">{success}</div>} {/* Mostrar mensaje de éxito */}
 
             <div className="mb-3">
                 <label className="form-label">Solicitud ID:</label>
@@ -187,6 +196,7 @@ const RechazarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.id}
+                    disabled
                     readOnly
                 />
             </div>
@@ -196,6 +206,7 @@ const RechazarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.numeroDeSerie}
+                    disabled
                     readOnly
                 />
             </div>
@@ -205,6 +216,7 @@ const RechazarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.fechaSolicitud}
+                    disabled
                     readOnly
                 />
             </div>
@@ -214,6 +226,7 @@ const RechazarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={obtenerNombreArea(solicitud.areaSolicitante)}
+                    disabled
                     readOnly
                 />
             </div>
@@ -223,6 +236,7 @@ const RechazarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={obtenerNombreUsuario(solicitud.usuarioSolicitante)}
+                    disabled
                     readOnly
                 />
             </div>
@@ -232,6 +246,7 @@ const RechazarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.tipoSolicitud}
+                    disabled
                     readOnly
                 />
             </div>
@@ -241,6 +256,7 @@ const RechazarSolicitud: React.FC = () => {
                     type="text"
                     className="form-control"
                     value={solicitud.estado}
+                    disabled
                     readOnly
                 />
             </div>
@@ -254,14 +270,19 @@ const RechazarSolicitud: React.FC = () => {
                 />
             </div>
 
-            <div className="d-flex justify-content-center mt-4">
+            <div className="mt-3 d-flex justify-content-between">
                 <button
-                    type="button"
-                    className="btn btn-danger"
+                    className="btn btn-success"
                     onClick={rechazarSolicitud}
-                    disabled={isProcessing} // Deshabilitar el botón mientras se procesa
+                    disabled={isProcessing} // Deshabilitar mientras se procesa
                 >
                     {isProcessing ? "Procesando..." : "Rechazar Solicitud"}
+                </button>
+                <button
+                    className="btn btn-danger"
+                    onClick={() => navigate("/gestion-solicitudes")}
+                >
+                    Cancelar
                 </button>
             </div>
         </div>
