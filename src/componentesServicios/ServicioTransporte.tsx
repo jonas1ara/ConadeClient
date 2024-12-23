@@ -19,8 +19,10 @@ const SolicitudServicioTransporte: React.FC = () => {
   const [descripcion, setDescripcion] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
-
   const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
+
+  setFechaSolicitud;
+  setTipoSolicitud;
 
   // Recuperar usuario desde localStorage
   useEffect(() => {

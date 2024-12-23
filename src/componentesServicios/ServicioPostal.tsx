@@ -18,8 +18,14 @@ const SolicitudServicioPostal: React.FC = () => {
   const [fechaRecepcionMaxima, setFechaRecepcionMaxima] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
-
   const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
+
+  console.log(usuarioSolicitante);
+  console.log(usuarioSolicitanteID);
+  console.log(estado);
+
+  setUsuarioSolicitante; // Añadido
+  setFechaSolicitud; // Añadido
 
   // Recuperar usuario desde localStorage
   useEffect(() => {

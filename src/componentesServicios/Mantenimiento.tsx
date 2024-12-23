@@ -16,7 +16,6 @@ const SolicitudServicioMantenimiento: React.FC = () => {
   const [estado, setEstado] = useState<string>("Solicitada");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
-
   const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
 
   // Recuperar usuario desde localStorage

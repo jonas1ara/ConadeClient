@@ -19,8 +19,10 @@ const SolicitudUsoInmobiliario: React.FC = () => {
   const [descripcion, setDescripcion] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
-
   const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
+
+  setFechaSolicitud;
+  console.log(descripcion);
 
   // Recuperar usuario desde localStorage
   useEffect(() => {
