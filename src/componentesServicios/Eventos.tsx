@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SolicitudUsoInmobiliario: React.FC = () => {
+const SolicitudEventos: React.FC = () => {
   const navigate = useNavigate();
 
   const [numeroDeSolicitud, setNumeroDeSolicitud] = useState<string>("");
@@ -317,12 +317,26 @@ const SolicitudUsoInmobiliario: React.FC = () => {
           </small>
         </div>
 
-        <div className="d-flex justify-content-between">
+        <div className="mb-3">
+          <label htmlFor="descripcion" className="form-label">
+            Descripción del servicio
+          </label>
+          <textarea
+            className="form-control"
+            id="descripcion"
+            name="descripcion"
+            value={descripcion}
+            onChange={manejarCambio}
+            required
+          />
+        </div>
+
+        <div className="d-flex justify-content-between mb-4">
           <button type="submit" className="btn btn-primary">
             Enviar Solicitud
           </button>
           <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
-            Cancelar
+            Regresar
           </button>
         </div>
       </form>
@@ -330,4 +344,4 @@ const SolicitudUsoInmobiliario: React.FC = () => {
   );
 };
 
-export default SolicitudUsoInmobiliario;
+export default SolicitudEventos;

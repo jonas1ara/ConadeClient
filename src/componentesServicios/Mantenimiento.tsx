@@ -235,20 +235,6 @@ const SolicitudServicioMantenimiento: React.FC = () => {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="descripcionServicio" className="form-label">
-            Descripción del Servicio
-          </label>
-          <textarea
-            className="form-control"
-            id="descripcionServicio"
-            name="descripcionServicio"
-            value={descripcionServicio}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
           <label htmlFor="fechaInicio" className="form-label">
             Fecha de Inicio
           </label>
@@ -278,13 +264,26 @@ const SolicitudServicioMantenimiento: React.FC = () => {
           />
         </div>
 
+        <div className="mb-3">
+          <label htmlFor="descripcionServicio" className="form-label">
+            Descripción del Servicio
+          </label>
+          <textarea
+            className="form-control"
+            id="descripcionServicio"
+            name="descripcionServicio"
+            value={descripcionServicio}
+            onChange={manejarCambio}
+            required
+          />
+        </div>
 
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-between mb-4">
           <button type="submit" className="btn btn-primary">
             Enviar Solicitud
           </button>
           <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
-            Cancelar
+            Regresar
           </button>
         </div>
       </form>

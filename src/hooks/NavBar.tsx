@@ -1,43 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const NavBar: React.FC = () => {
-  const [usuario, setUsuario] = useState<string | null>(null); // Estado dinámico para el usuario
-  const [rol, setRol] = useState<string | null>(null); // Estado para el rol
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // Estado para el modo oscuro
+  const [usuario, setUsuario] = useState<string | null>(null);
+  const [rol, setRol] = useState<string | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const navigate = useNavigate();
+  const location = useLocation(); // Obtener la ubicación actual
 
   useEffect(() => {
-    // Obtener usuario y rol desde localStorage al montar el componente
     const usuarioActual = localStorage.getItem("usuario");
     const rolActual = localStorage.getItem("rol");
 
-    // Verificar la preferencia de color del navegador
     const theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-
-    // Aplicar el tema detectado
     setIsDarkMode(theme === "dark");
-    document.documentElement.setAttribute('data-bs-theme', theme);
-
-    // Almacenar la preferencia del tema en localStorage para que se recuerde
+    document.documentElement.setAttribute("data-bs-theme", theme);
     localStorage.setItem("theme", theme);
 
     setUsuario(usuarioActual);
     setRol(rolActual);
-  }, []); // Solo se ejecuta al montar el componente
+  }, []);
 
   const manejarCerrarSesion = () => {
-
     const confirmar = window.confirm("¿Estás seguro de cerrar sesión?");
-
     if (confirmar) {
-
-    localStorage.removeItem("usuario"); // Eliminar datos del localStorage
-    localStorage.removeItem("rol"); // Eliminar el rol del localStorage
-    navigate("/login"); // Redirigir al login
-    
+      localStorage.removeItem("usuario");
+      localStorage.removeItem("rol");
+      navigate("/login");
     }
-  
   };
 
   const manejarNavegacion = () => {
@@ -49,11 +39,15 @@ const NavBar: React.FC = () => {
   };
 
   const manejarVerSolicitudes = () => {
-    navigate("/solicitudes-por-usuario"); // Redirigir a la página de solicitudes
+    navigate("/solicitudes-por-usuario");
+  };
+
+  const manejarRegresar = () => {
+    navigate(-1); // Navegar a la página anterior
   };
 
   return (
-    <nav className={`navbar navbar-expand-lg ${isDarkMode ? 'navbar-dark bg-dark' : 'navbar-light bg-light'}`}>
+    <nav className={`navbar navbar-expand-lg ${isDarkMode ? "navbar-dark bg-dark" : "navbar-light bg-light"}`}>
       <div className="container-fluid">
         <button
           className="navbar-brand btn btn-link"
@@ -81,14 +75,26 @@ const NavBar: React.FC = () => {
               </span>
             </li>
 
-            {/* Mostrar el botón de "Solicitudes" solo si el rol es "Usuario" */}
-            {rol === "Usuario" && (
+            {/* Mostrar el botón "Solicitudes" solo si el rol es "Usuario" */}
+            {rol === "Usuario" && location.pathname !== "/solicitudes-por-usuario" && (
               <li className="nav-item">
                 <button
-                  className={`btn ${isDarkMode ? 'btn-outline-light' : 'btn-outline-dark'} me-1`}
+                  className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
                   onClick={manejarVerSolicitudes}
                 >
                   Solicitudes
+                </button>
+              </li>
+            )}
+
+            {/* Mostrar el botón "Regresar" solo en la página de solicitudes */}
+            {location.pathname === "/solicitudes-por-usuario" && (
+              <li className="nav-item">
+                <button
+                  className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
+                  onClick={manejarRegresar}
+                >
+                  Regresar
                 </button>
               </li>
             )}

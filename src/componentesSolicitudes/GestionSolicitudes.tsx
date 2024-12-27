@@ -10,6 +10,7 @@ interface Solicitud {
   areaSolicitante: number; // Cambiado a number para relacionar con el ID
   usuarioSolicitante: number; // Cambiado a number para relacionar con el ID
   descripcionServicio: string;
+  observaciones: string;
 }
 
 interface Area {
@@ -30,8 +31,11 @@ const GestionSolicitudes: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroUsuario, setFiltroUsuario] = useState<number | null>(null); // Filtro de usuario
+  const [filtroAnio, setFiltroAnio] = useState<number | null>(null);
+  const [filtroMes, setFiltroMes] = useState<number | null>(null);
   const [ordenFecha, setOrdenFecha] = useState<"asc" | "desc" | null>(null);
   const [paginaActual, setPaginaActual] = useState(1);
+  const [accionSeleccionada, setAccionSeleccionada] = useState<string>('');
   const solicitudesPorPagina = 10; // Número de elementos por página
 
   const navigate = useNavigate();
@@ -160,6 +164,20 @@ const GestionSolicitudes: React.FC = () => {
       );
     }
 
+    if (filtroAnio) {
+      filtradas = filtradas.filter((solicitud) => {
+        const anioSolicitud = new Date(solicitud.fechaSolicitud).getFullYear();
+        return anioSolicitud === filtroAnio;
+      });
+    }
+
+    if (filtroMes) {
+      filtradas = filtradas.filter((solicitud) => {
+        const mesSolicitud = new Date(solicitud.fechaSolicitud).getMonth() + 1; // Meses en JavaScript van de 0 a 11
+        return mesSolicitud === filtroMes;
+      });
+    }
+
     return filtradas;
   };
 
@@ -218,14 +236,20 @@ const GestionSolicitudes: React.FC = () => {
     }
   };
 
+  const formatDateTime = (isoDate: string): string => {
+    const date = new Date(isoDate);
+    const formattedDate = date.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const formattedTime = date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return `${formattedDate} - ${formattedTime}`;
+  };
 
   const imprimirSolicitud = (solicitud: Solicitud) => {
     const printWindow = window.open("", "", "height=600,width=800");
     if (printWindow) {
-      printWindow.document.write('<html><head><title>Solicitud</title></head><body>');
-      printWindow.document.write(`<h2>Solicitud ID: ${solicitud.id}</h2>`);
+      printWindow.document.write('<html><head><title>Imprimir solicitud</title></head><body>');
+      printWindow.document.write(`<h2>Solicitud</h2>`);
       printWindow.document.write(`<p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>`);
-      printWindow.document.write(`<p><strong>Fecha de Solicitud:</strong> ${solicitud.fechaSolicitud}</p>`);
+      printWindow.document.write(`<p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>`);
       printWindow.document.write(`<p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>`);
       printWindow.document.write(`<p><strong>Tipo de Solicitud:</strong> ${solicitud.tipoSolicitud}</p>`);
       printWindow.document.write(`<p><strong>Estado:</strong> ${solicitud.estado}</p>`);
@@ -234,6 +258,110 @@ const GestionSolicitudes: React.FC = () => {
       printWindow.document.write("</body></html>");
       printWindow.document.close();
       printWindow.print();
+    }
+  };
+
+  const imprimirTodasLasSolicitudes = () => {
+    const printContent = `
+        <html>
+        <head>
+          <title>Imprimir Solicitudes</title>
+        </head>
+        <body>
+          <h1>Lista de Solicitudes</h1>
+          <table border="1" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr>
+                <th>Número de Serie</th>
+                <th>Fecha de Solicitud</th>
+                <th>Área Solicitante</th>
+                <th>Tipo de Solicitud</th>
+                <th>Estado</th>
+                <th>Descripción del Servicio</th>
+                <th>Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${solicitudesFiltradas
+        .map(
+          (solicitud) => `
+                <tr>
+                  <td>${solicitud.numeroDeSerie}</td>
+                  <td>${formatDateTime(solicitud.fechaSolicitud)}</td>
+                  <td>${solicitud.areaSolicitante}</td>
+                  <td>${solicitud.tipoSolicitud}</td>
+                  <td>${solicitud.estado}</td>
+                  <td>${solicitud.descripcionServicio}</td>
+                  <td>${solicitud.observaciones}</td>
+                </tr>
+              `
+        )
+        .join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+    const newWindow = window.open('', '_blank', 'width=800,height=600');
+    if (newWindow) {
+      newWindow.document.open();
+      newWindow.document.write(printContent);
+      newWindow.document.close();
+      newWindow.print();
+    }
+  };
+
+  const exportarSolicitudesCSV = () => {
+    const headers = [
+      "Número de Serie",
+      "Fecha de Solicitud",
+      "Área Solicitante",
+      "Tipo de Solicitud",
+      "Estado",
+      "Descripción del Servicio",
+      "Observaciones",
+    ];
+
+    const rows = solicitudesFiltradas.map((solicitud) => [
+      solicitud.numeroDeSerie,
+      formatDateTime(solicitud.fechaSolicitud),
+      solicitud.areaSolicitante,
+      solicitud.tipoSolicitud,
+      solicitud.estado,
+      solicitud.descripcionServicio,
+      solicitud.observaciones,
+    ]);
+
+    // Unir headers y filas
+    const csvContent = [
+      headers.join(","), // Encabezados
+      ...rows.map((row) => row.map((value) => `"${value}"`).join(",")), // Filas con valores escapados
+    ].join("\n");
+
+    // Crear un Blob para el archivo CSV
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    // Crear un enlace para descargar
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "Solicitudes.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const manejarCambio = (evento: React.ChangeEvent<HTMLSelectElement>) => {
+    setAccionSeleccionada(evento.target.value);
+  };
+
+  const manejarAccion = () => {
+    if (accionSeleccionada === 'imprimir') {
+      imprimirTodasLasSolicitudes();
+    } else if (accionSeleccionada === 'exportar') {
+      exportarSolicitudesCSV();
+    } else {
+      alert('Por favor selecciona una acción.');
     }
   };
 
@@ -257,6 +385,7 @@ const GestionSolicitudes: React.FC = () => {
             <option value="Rechazada">Rechazada</option>
           </select>
         </div>
+
         <div>
           <label className="form-label">Filtrar por Usuario:</label>
           <select
@@ -272,6 +401,39 @@ const GestionSolicitudes: React.FC = () => {
             ))}
           </select>
         </div>
+
+        <div>
+          <label className="form-label">Filtrar por Año:</label>
+          <select
+            className="form-select"
+            value={filtroAnio || ""}
+            onChange={(e) => setFiltroAnio(e.target.value ? parseInt(e.target.value, 10) : null)}
+          >
+            <option value="">Todos</option>
+            {[2020, 2021, 2022, 2023, 2024].map((anio) => (
+              <option key={anio} value={anio}>
+                {anio}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="form-label">Filtrar por Mes:</label>
+          <select
+            className="form-select"
+            value={filtroMes || ""}
+            onChange={(e) => setFiltroMes(e.target.value ? parseInt(e.target.value, 10) : null)}
+          >
+            <option value="">Todos</option>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((mes) => (
+              <option key={mes} value={mes}>
+                {mes.toString().padStart(2, "0")}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div>
           <label className="form-label">Ordenar por Fecha:</label>
           <select
@@ -286,10 +448,30 @@ const GestionSolicitudes: React.FC = () => {
         </div>
       </div>
 
+      <div className="mb-4 text-end">
+        <div className="d-inline-block me-3">
+          <select
+            className="form-select"
+            value={accionSeleccionada}
+            onChange={manejarCambio}
+          >
+            <option value="">Selecciona una acción</option>
+            <option value="imprimir">Imprimir Todas las Solicitudes</option>
+            <option value="exportar">Exportar Solicitudes a CSV</option>
+          </select>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={manejarAccion}
+          disabled={!accionSeleccionada}
+        >
+          Ejecutar
+        </button>
+      </div>
+
       <table className="table table-bordered">
         <thead>
           <tr>
-            <th>ID</th>
             <th>Número de Serie</th>
             <th>Fecha de Solicitud</th>
             <th>Área Solicitante</th>
@@ -301,58 +483,106 @@ const GestionSolicitudes: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {solicitudesPaginadas.map((solicitud) => (
-            <tr key={solicitud.id}>
-              <td>{solicitud.id}</td>
-              <td>{solicitud.numeroDeSerie}</td>
-              <td>{solicitud.fechaSolicitud}</td>
-              <td>{obtenerNombreArea(solicitud.areaSolicitante)}</td>
-              <td>{obtenerNombreUsuario(solicitud.usuarioSolicitante)}</td>
-              <td>{solicitud.tipoSolicitud}</td>
-              <td>{solicitud.estado}</td>
-              <td>{solicitud.descripcionServicio}</td>
-              <td className="d-flex justify-content-between">
-                <button
-                  className="btn btn-success me-2"
-                  onClick={() => aceptarSolicitud(solicitud.id)}
-                >
-                  Aceptar
-                </button>
-                <button
-                  className="btn btn-warning me-2"
-                  onClick={() => rechazarSolicitud(solicitud.id)}
-                >
-                  Rechazar
-                </button>
-                <button
-                  className="btn btn-danger me-2"
-                  onClick={() => eliminarSolicitud(solicitud.id)}
-                >
-                  Eliminar
-                </button>
-                <button
-                  className="btn btn-info"
-                  onClick={() => imprimirSolicitud(solicitud)}
-                >
-                  Imprimir
-                </button>
+          {solicitudesPaginadas.length > 0 ? (
+            solicitudesPaginadas.map((solicitud) => (
+              <tr key={solicitud.numeroDeSerie}>
+                <td>{solicitud.numeroDeSerie}</td>
+                <td>{formatDateTime(solicitud.fechaSolicitud)}</td>
+                <td>{obtenerNombreArea(solicitud.areaSolicitante)}</td>
+                <td>{obtenerNombreUsuario(solicitud.usuarioSolicitante)}</td>
+                <td>{solicitud.tipoSolicitud}</td>
+                <td>{solicitud.estado}</td>
+                <td>{solicitud.descripcionServicio}</td>
+                <td className="d-flex justify-content-between">
+                  <button
+                    className="btn btn-success me-2"
+                    onClick={() => aceptarSolicitud(solicitud.id)}
+                  >
+                    Aceptar
+                  </button>
+                  <button
+                    className="btn btn-warning me-2"
+                    onClick={() => rechazarSolicitud(solicitud.id)}
+                  >
+                    Rechazar
+                  </button>
+                  <button
+                    className="btn btn-danger me-2"
+                    onClick={() => eliminarSolicitud(solicitud.id)}
+                    disabled={solicitud.estado !== 'Solicitada'}
+                  >
+                    Eliminar
+                  </button>
+                  <button
+                    className="btn btn-info"
+                    onClick={() => imprimirSolicitud(solicitud)}
+                  >
+                    Imprimir
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={8} className="text-center">
+                No hay solicitudes disponibles.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
 
-      <div className="d-flex justify-content-center mt-3">
-        {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((numero) => (
-          <button
-            key={numero}
-            className={`btn me-2 ${paginaActual === numero ? "btn-primary" : "btn-outline-primary"}`}
-            onClick={() => cambiarPagina(numero)}
-          >
-            {numero}
-          </button>
-        ))}
+      <div className="d-flex justify-content-center mt-3 mb-4">
+        <button
+          className="btn btn-outline-secondary me-2"
+          onClick={() => cambiarPagina(1)}
+          disabled={paginaActual === 1}
+        >
+          Primero
+        </button>
+
+        <button
+          className="btn btn-outline-secondary me-2"
+          onClick={() => cambiarPagina(paginaActual - 1)}
+          disabled={paginaActual === 1}
+        >
+          Anterior
+        </button>
+
+        {Array.from({ length: totalPaginas }, (_, i) => {
+          const pageNum = i + 1;
+          const isInRange =
+            pageNum === 1 ||
+            pageNum === totalPaginas ||
+            (pageNum >= paginaActual - 2 && pageNum <= paginaActual + 2);
+          return isInRange ? (
+            <button
+              key={pageNum}
+              className={`btn me-2 ${paginaActual === pageNum ? "btn-primary" : "btn-outline-secondary"}`}
+              onClick={() => cambiarPagina(pageNum)}
+            >
+              {pageNum}
+            </button>
+          ) : null;
+        })}
+
+        <button
+          className="btn btn-outline-secondary me-2"
+          onClick={() => cambiarPagina(paginaActual + 1)}
+          disabled={paginaActual === totalPaginas}
+        >
+          Siguiente
+        </button>
+
+        <button
+          className="btn btn-outline-secondary"
+          onClick={() => cambiarPagina(totalPaginas)}
+          disabled={paginaActual === totalPaginas}
+        >
+          Último
+        </button>
       </div>
+
     </div>
   );
 };

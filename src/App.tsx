@@ -6,7 +6,7 @@ import PanelPrincipal from "./componentesServicios/PanelPrincipal";
 import Mantenimiento from "./componentesServicios/Mantenimiento";
 import ServicioPostal from "./componentesServicios/ServicioPostal";
 import ServicioTransporte from "./componentesServicios/ServicioTransporte";
-import UsoAuditorios from "./componentesServicios/UsoInmobiliario";
+import Eventos from "./componentesServicios/Eventos";
 import NavBar from "./hooks/NavBar";
 import GestionSolicitudes from "./componentesSolicitudes/GestionSolicitudes"; // Importamos la nueva pantalla
 import SolicitudesPorUsuario from "./componentesSolicitudes/SolicitudesPorUsuario";
@@ -102,11 +102,11 @@ function App() {
           ) : <Navigate to="/" />} 
         />
         <Route 
-          path="/uso-auditorios" 
+          path="/eventos" 
           element={isAuthenticated() ? (
             <>
               <NavBar/>
-              <UsoAuditorios />
+              <Eventos />
             </>
           ) : <Navigate to="/" />} 
         />

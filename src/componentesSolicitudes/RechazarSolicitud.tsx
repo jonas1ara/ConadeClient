@@ -282,7 +282,7 @@ const RechazarSolicitud: React.FC = () => {
                     className="btn btn-danger"
                     onClick={() => navigate("/gestion-solicitudes")}
                 >
-                    Cancelar
+                    Regresar
                 </button>
             </div>
         </div>

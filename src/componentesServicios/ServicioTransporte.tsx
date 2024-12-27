@@ -322,15 +322,16 @@ const SolicitudServicioTransporte: React.FC = () => {
             name="descripcion"
             value={descripcion}
             onChange={manejarCambio}
+            required
           />
         </div>
 
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-between mb-4">
           <button type="submit" className="btn btn-primary">
             Enviar Solicitud
           </button>
           <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>
-            Cancelar
+            Regresar
           </button>
         </div>
       </form>

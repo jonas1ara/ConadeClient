@@ -1,4 +1,3 @@
-// src/componentes/PanelPrincipal.tsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -23,8 +22,8 @@ const PanelPrincipal: React.FC = () => {
       <h2 className="text-center mb-4">Panel Principal</h2>
 
       <div className="row">
-        <div className="col-md-6 mb-4">
-          <div className="card">
+        <div className="col-md-6 mb-4 d-flex align-items-stretch">
+          <div className="card w-100">
             <div className="card-body text-center">
               <h5 className="card-title">Servicio Postal</h5>
               <p className="card-text">Solicita servicios postales internos.</p>
@@ -35,8 +34,8 @@ const PanelPrincipal: React.FC = () => {
           </div>
         </div>
 
-        <div className="col-md-6 mb-4">
-          <div className="card">
+        <div className="col-md-6 mb-4 d-flex align-items-stretch">
+          <div className="card w-100">
             <div className="card-body text-center">
               <h5 className="card-title">Servicio de Transporte</h5>
               <p className="card-text">Solicita transporte para tu área.</p>
@@ -49,25 +48,39 @@ const PanelPrincipal: React.FC = () => {
       </div>
 
       <div className="row">
-        <div className="col-md-6 mb-4">
-          <div className="card">
+        <div className="col-md-6 mb-4 d-flex align-items-stretch">
+          <div className="card w-100">
             <div className="card-body text-center">
-              <h5 className="card-title">Uso de Auditorios</h5>
-              <p className="card-text">Reserva un auditorio o instalaciones.</p>
-              <Link to="/uso-auditorios" className="btn btn-primary">
-                Ir al Uso de Auditorios
+              <h5 className="card-title">Eventos</h5>
+              <p className="card-text">Solicita mobiliario o inmobiliario para eventos.</p>
+              <Link to="/eventos" className="btn btn-primary">
+                Ir a Eventos
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="col-md-6 mb-4">
-          <div className="card">
+        <div className="col-md-6 mb-4 d-flex align-items-stretch">
+          <div className="card w-100">
             <div className="card-body text-center">
-              <h5 className="card-title">Instalación, Reparación y Mantenimiento</h5>
+              <h5 className="card-title">Mantenimiento</h5>
               <p className="card-text">Solicita instalación, reparación o mantenimiento de mobiliario.</p>
               <Link to="/mantenimiento" className="btn btn-primary">
                 Ir a Mantenimiento
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col-md-6 mb-4 d-flex align-items-stretch">
+          <div className="card w-100">
+            <div className="card-body text-center">
+              <h5 className="card-title">Abastecimiento de Combustible</h5>
+              <p className="card-text">Solicita abastecimiento de combustible para vehículos.</p>
+              <Link to="/abastecimiento-combustible" className="btn btn-primary">
+               Ir a Abastecimiento de Combustible
               </Link>
             </div>
           </div>
