@@ -23,7 +23,7 @@ interface Usuario {
     nombreUsuario: string;
 }
 
-const RechazarSolicitud: React.FC = () => {
+const DetallesSolicitud: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
@@ -31,7 +31,7 @@ const RechazarSolicitud: React.FC = () => {
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
     const [observaciones, setObservaciones] = useState<string>("");
     const [error, setError] = useState<string>("");
-    const [isProcessing, setIsProcessing] = useState<boolean>(false); // Estado para controlar el procesamiento
+    const [isProcessing, setIsProcessing] = useState<boolean>(false); // Nuevo estado para controlar el proceso de aprobación
     const [success, setSuccess] = useState<string>(""); // Estado para manejar el mensaje de éxito
 
     useEffect(() => {
@@ -120,80 +120,14 @@ const RechazarSolicitud: React.FC = () => {
         return `${formattedDate} - ${formattedTime}`;
     };
 
-    const rechazarSolicitud = async () => {
-        try {
-            setError(""); // Limpiamos el mensaje de error
-            if (!solicitud) {
-                setError("No se ha cargado la solicitud.");
-                setIsProcessing(false); // Revertimos el estado de procesamiento
-                return;
-            }
-
-            if (solicitud.estado.toLowerCase() === "rechazada") {
-                setError("La solicitud ya ha sido rechazada.");
-                setIsProcessing(false); // Revertimos el estado de procesamiento
-                return;
-            }
-
-            // Validación de que las observaciones no estén vacías
-            if (!observaciones.trim()) {
-                setError("El campo observaciones es obligatorio.");
-                return;
-            }
-
-            setIsProcessing(true); // Activamos el estado de procesamiento
-
-            // Obtén el usuarioId desde localStorage de manera más confiable
-            const usuarioIdStr = localStorage.getItem("idUsuario");
-            const usuarioId = usuarioIdStr ? parseInt(usuarioIdStr) : 0; // Si no está disponible, se asigna 0.
-
-            // Verificar que los datos a enviar son correctos
-            console.log("Solicitud a aprobar:", solicitud);
-            console.log("Usuario ID:", usuarioId);
-            console.log("Observaciones:", observaciones);
-
-            const url = `https://localhost:7094/api/Usuario/AprobarRechazarSolicitud?idSolicitud=${solicitud.id}&usuarioId=${usuarioId}&accion=Rechazar&observaciones=${encodeURIComponent(observaciones)}`;
-
-            console.log("URL de la solicitud:", url); // Verificar la URL que se está construyendo
-
-            const response = await fetch(url, {
-                method: "POST",
-            });
-
-            // Si la respuesta no es exitosa, manejamos el error
-            if (!response.ok) {
-                if (response.status === 404) {
-                    const data = await response.json();
-                    setError(data.mensaje || "No se pudo rechazar la solicitud.");
-                } else {
-                    throw new Error("Hubo un problema al rechazar la solicitud.");
-                }
-            } else {
-                const data = await response.json();
-
-                if (data.success) {
-                    setSuccess(data.mensaje || "La solicitud ha sido aprobada con éxito."); // Establecer el mensaje de éxito
-
-                    setTimeout(() => navigate("/gestion-solicitudes"), 4000);
-                } else {
-                    setError(data.mensaje || "No se pudo rechazar la solicitud.");
-                }
-            }
-        } catch (error: any) {
-            console.error("Error al rechazar la solicitud:", error);
-            setError(error.message || "Hubo un problema al rechazar la solicitud.");
-        } finally {
-            setIsProcessing(false); // Revertimos el estado de procesamiento después de completar la operación
-        }
-    };
-
+  
     if (!solicitud) {
         return <div>Cargando solicitud...</div>;
     }
 
     return (
         <div className="mt-4">
-            <h2 className="text-center mb-4">Rechazar Solicitud</h2>
+            <h2 className="text-center mb-4">Aprobar Solicitud</h2>
             {error && <div className="alert alert-danger text-center">{error}</div>}
             {success && <div className="alert alert-success text-center">{success}</div>} {/* Mostrar mensaje de éxito */}
 
@@ -209,34 +143,19 @@ const RechazarSolicitud: React.FC = () => {
                     <p><strong>Descripción de Servicio:</strong> {solicitud.descripcionServicio}</p>
                 </div>
             </div>
-            
-            <div className="mb-3">
+
+
+            <div className="mt-4">
                 <label className="form-label">Observaciones:</label>
                 <textarea
                     className="form-control"
-                    rows={3}
                     value={observaciones}
                     onChange={(e) => setObservaciones(e.target.value)}
-                />
+                ></textarea>
             </div>
 
-            <div className="mt-3 d-flex justify-content-between">
-                <button
-                    className="btn btn-success"
-                    onClick={rechazarSolicitud}
-                    disabled={isProcessing} // Deshabilitar mientras se procesa
-                >
-                    {isProcessing ? "Procesando..." : "Rechazar Solicitud"}
-                </button>
-                <button
-                    className="btn btn-danger"
-                    onClick={() => navigate("/gestion-solicitudes")}
-                >
-                    Regresar
-                </button>
-            </div>
         </div>
     );
-};
+}
 
-export default RechazarSolicitud;
+export default DetallesSolicitud;

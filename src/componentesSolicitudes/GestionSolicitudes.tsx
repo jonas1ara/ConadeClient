@@ -198,6 +198,7 @@ const GestionSolicitudes: React.FC = () => {
 
   const aceptarSolicitud = (id: number) => navigate(`/aprobar-solicitud/${id}`);
   const rechazarSolicitud = (id: number) => navigate(`/rechazar-solicitud/${id}`);
+  const detallesSolicitud = (id: number) => navigate(`/detalles-solicitud/${id}`);
   const eliminarSolicitud = async (id: number) => {
     console.log("ID de solicitud a eliminar:", id);
 
@@ -246,20 +247,47 @@ const GestionSolicitudes: React.FC = () => {
   const imprimirSolicitud = (solicitud: Solicitud) => {
     const printWindow = window.open("", "", "height=600,width=800");
     if (printWindow) {
-      printWindow.document.write('<html><head><title>Imprimir solicitud</title></head><body>');
-      printWindow.document.write(`<h2>Solicitud</h2>`);
-      printWindow.document.write(`<p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>`);
-      printWindow.document.write(`<p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>`);
-      printWindow.document.write(`<p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>`);
-      printWindow.document.write(`<p><strong>Tipo de Solicitud:</strong> ${solicitud.tipoSolicitud}</p>`);
-      printWindow.document.write(`<p><strong>Estado:</strong> ${solicitud.estado}</p>`);
-      printWindow.document.write(`<p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>`);
-      printWindow.document.write(`<p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>`);
-      printWindow.document.write("</body></html>");
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Imprimir solicitud</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+              }
+              .text-end {
+                text-align: right;
+              }
+              .details {
+                margin: 10px 0;
+              }
+            </style>
+          </head>
+          <body>
+            <h2 class="text-end">Solicitud de ${solicitud.tipoSolicitud}</h2>
+            <div class="details">
+              <p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>
+              <p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>
+              <p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>
+              <p><strong>Estado:</strong> ${solicitud.estado}</p>
+              <p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>
+              <p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
+              ${
+                solicitud.estado === "Rechazada" || solicitud.estado === "Atendida"
+                  ? `<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`
+                  : ""
+              }
+            </div>
+          </body>
+        </html>
+      `);
       printWindow.document.close();
       printWindow.print();
     }
   };
+  
+
 
   const imprimirTodasLasSolicitudes = () => {
     const printContent = `
@@ -497,12 +525,14 @@ const GestionSolicitudes: React.FC = () => {
                   <button
                     className="btn btn-success me-2"
                     onClick={() => aceptarSolicitud(solicitud.id)}
+                    disabled={solicitud.estado !== 'Solicitada'}
                   >
                     Aceptar
                   </button>
                   <button
                     className="btn btn-warning me-2"
                     onClick={() => rechazarSolicitud(solicitud.id)}
+                    disabled={solicitud.estado !== 'Solicitada'}
                   >
                     Rechazar
                   </button>
@@ -512,6 +542,12 @@ const GestionSolicitudes: React.FC = () => {
                     disabled={solicitud.estado !== 'Solicitada'}
                   >
                     Eliminar
+                  </button>
+                  <button
+                    className="btn btn-primary me-2"
+                    onClick={() => detallesSolicitud(solicitud.id)}
+                  >
+                    Detalles
                   </button>
                   <button
                     className="btn btn-info"

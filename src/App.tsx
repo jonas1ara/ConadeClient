@@ -12,6 +12,7 @@ import GestionSolicitudes from "./componentesSolicitudes/GestionSolicitudes"; //
 import SolicitudesPorUsuario from "./componentesSolicitudes/SolicitudesPorUsuario";
 import AprobarSolicitud from "./componentesSolicitudes/AprobarSolicitud";
 import RechazarSolicitud from "./componentesSolicitudes/RechazarSolicitud";
+import DetallesSolicitud from './componentesSolicitudes/DetallesSolicitud';
 
 function App() {
   UseTheme(); // Aplicar el tema automáticamente
@@ -78,6 +79,17 @@ function App() {
             <>
               <NavBar/>
               <RechazarSolicitud />
+            </>
+          ) : <Navigate to="/" />}
+
+        />
+
+        <Route 
+          path="/detalles-solicitud/:id" 
+          element={isAuthenticated() ? (
+            <>
+              <NavBar/>
+              <DetallesSolicitud />
             </>
           ) : <Navigate to="/" />}
 

@@ -113,6 +113,13 @@ const AprobarSolicitud: React.FC = () => {
         return usuario ? usuario.nombreUsuario : "No definido";
     };
 
+    const formatDateTime = (isoDate: string): string => {
+        const date = new Date(isoDate);
+        const formattedDate = date.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const formattedTime = date.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false });
+        return `${formattedDate} - ${formattedTime}`;
+    };
+
     const aprobarSolicitud = async () => {
         try {
             setError(""); // Limpiar el mensaje de error
@@ -191,85 +198,19 @@ const AprobarSolicitud: React.FC = () => {
             {error && <div className="alert alert-danger text-center">{error}</div>}
             {success && <div className="alert alert-success text-center">{success}</div>} {/* Mostrar mensaje de éxito */}
 
-            <div className="mb-3">
-                <label className="form-label">Solicitud ID:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={solicitud.id}
-                    disabled
-                    readOnly
-                />
+            <div className="card">
+                <div className="card-body">
+                    <h5 className="card-title text-end">Detalles de la Solicitud</h5>
+                    <p><strong>Número de Serie:</strong> {solicitud.numeroDeSerie}</p>
+                    <p><strong>Fecha de Solicitud:</strong> {formatDateTime(solicitud.fechaSolicitud)}</p>
+                    <p><strong>Área Solicitante:</strong> {obtenerNombreArea(solicitud.areaSolicitante)}</p>
+                    <p><strong>Usuario Solicitante:</strong> {obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
+                    <p><strong>Tipo de Solicitud:</strong> {solicitud.tipoSolicitud}</p>
+                    <p><strong>Estado:</strong> {solicitud.estado}</p>
+                    <p><strong>Descripción de Servicio:</strong> {solicitud.descripcionServicio}</p>
+                </div>
             </div>
-            <div className="mb-3">
-                <label className="form-label">Número de Serie:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={solicitud.numeroDeSerie}
-                    disabled
-                    readOnly
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Fecha de Solicitud:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={solicitud.fechaSolicitud}
-                    disabled
-                    readOnly
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Área Solicitante:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={obtenerNombreArea(solicitud.areaSolicitante)}
-                    disabled
-                    readOnly
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Usuario Solicitante:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={obtenerNombreUsuario(solicitud.usuarioSolicitante)}
-                    disabled
-                    readOnly
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Tipo de Solicitud:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={solicitud.tipoSolicitud}
-                    disabled
-                    readOnly
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Estado:</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={solicitud.estado}
-                    disabled
-                    readOnly
-                />
-            </div>
-            <div className="mb-3">
-                <label className="form-label">Descripción de Servicio:</label>
-                <textarea
-                    className="form-control"
-                    value={solicitud.descripcionServicio}
-                    disabled
-                    readOnly
-                />
-            </div>
+
 
             <div className="mt-4">
                 <label className="form-label">Observaciones:</label>
