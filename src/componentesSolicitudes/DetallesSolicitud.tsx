@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface Solicitud {
     id: number;
@@ -10,7 +10,8 @@ interface Solicitud {
     observaciones: string;
     areaSolicitante: number;
     descripcionServicio: string;
-    usuarioSolicitante: number; // Para relacionar con el ID del usuario
+    usuarioSolicitante: number;
+    areaId: number;
 }
 
 interface Area {
@@ -24,52 +25,15 @@ interface Usuario {
 }
 
 const DetallesSolicitud: React.FC = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+    const { state } = useLocation();  // Obtener el estado de la navegación
+    const solicitud = state?.solicitud as Solicitud | null;  // Asegurarse de que la solicitud esté presente
     const [areas, setAreas] = useState<Area[]>([]);
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-    const [observaciones, setObservaciones] = useState<string>("");
     const [error, setError] = useState<string>("");
-    const [isProcessing, setIsProcessing] = useState<boolean>(false); // Nuevo estado para controlar el proceso de aprobación
-    const [success, setSuccess] = useState<string>(""); // Estado para manejar el mensaje de éxito
+
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const obtenerSolicitud = async () => {
-            try {
-                const areaId = parseInt(localStorage.getItem("areaId") || "0");
-
-                let url = "";
-                switch (areaId) {
-                    case 1:
-                        url = `https://localhost:7094/api/ServicioPostal/ObtenerPorId/${id}`;
-                        break;
-                    case 2:
-                        url = `https://localhost:7094/api/ServicioTransporte/ObtenerPorId/${id}`;
-                        break;
-                    case 3:
-                        url = `https://localhost:7094/api/UsoInmobiliario/ObtenerPorId/${id}`;
-                        break;
-                    case 4:
-                        url = `https://localhost:7094/api/Mantenimiento/Obtener/${id}`;
-                        break;
-                    default:
-                        throw new Error("Área no válida o no definida.");
-                }
-
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error("Error al obtener la solicitud.");
-                }
-
-                const data = await response.json();
-                setSolicitud(data);
-            } catch (error: any) {
-                console.error("Error al cargar la solicitud:", error);
-                setError(error.message || "Hubo un problema al cargar la solicitud.");
-            }
-        };
-
         const obtenerAreas = async () => {
             try {
                 const response = await fetch("https://localhost:7094/api/CatArea/Listar");
@@ -98,10 +62,9 @@ const DetallesSolicitud: React.FC = () => {
             }
         };
 
-        obtenerSolicitud();
         obtenerAreas();
         obtenerUsuarios();
-    }, [id]);
+    }, []);
 
     const obtenerNombreArea = (id: number) => {
         const area = areas.find((area) => area.idArea === id);
@@ -120,20 +83,61 @@ const DetallesSolicitud: React.FC = () => {
         return `${formattedDate} - ${formattedTime}`;
     };
 
-  
+    const imprimirSolicitud = (solicitud: Solicitud) => {
+        const printWindow = window.open("", "", "height=600,width=800");
+        if (printWindow) {
+            printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Imprimir solicitud</title>
+                    <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        margin: 20px;
+                    }
+                    .text-end {
+                        text-align: right;
+                    }
+                    .details {
+                        margin: 10px 0;
+                    }
+                    </style>
+                </head>
+                <body>
+                    <h2 class="text-end">Solicitud de ${solicitud.tipoSolicitud}</h2>
+                    <div class="details">
+                        <p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>
+                        <p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>
+                        <p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>
+                        <p><strong>Estado:</strong> ${solicitud.estado}</p>
+                        <p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>
+                        <p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
+                        ${
+                            solicitud.estado === "Rechazada" || solicitud.estado === "Atendida"
+                            ? `<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`
+                            : ""
+                        }
+                    </div>
+                </body>
+            </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    };
+
     if (!solicitud) {
         return <div>Cargando solicitud...</div>;
     }
 
     return (
         <div className="mt-4">
-            <h2 className="text-center mb-4">Aprobar Solicitud</h2>
+            <h2 className="text-center mb-4">Detalles de la Solicitud</h2>
             {error && <div className="alert alert-danger text-center">{error}</div>}
-            {success && <div className="alert alert-success text-center">{success}</div>} {/* Mostrar mensaje de éxito */}
-
+            
             <div className="card">
                 <div className="card-body">
-                    <h5 className="card-title text-end">Detalles de la Solicitud</h5>
+                    <h5 className="card-title text-end">Solicitud de {solicitud.tipoSolicitud}</h5>
                     <p><strong>Número de Serie:</strong> {solicitud.numeroDeSerie}</p>
                     <p><strong>Fecha de Solicitud:</strong> {formatDateTime(solicitud.fechaSolicitud)}</p>
                     <p><strong>Área Solicitante:</strong> {obtenerNombreArea(solicitud.areaSolicitante)}</p>
@@ -141,21 +145,28 @@ const DetallesSolicitud: React.FC = () => {
                     <p><strong>Tipo de Solicitud:</strong> {solicitud.tipoSolicitud}</p>
                     <p><strong>Estado:</strong> {solicitud.estado}</p>
                     <p><strong>Descripción de Servicio:</strong> {solicitud.descripcionServicio}</p>
+                    {solicitud.estado !== "Solicitada" && (
+                        <p><strong>Observaciones: </strong> {solicitud.observaciones}</p>
+                    )}
                 </div>
             </div>
 
-
-            <div className="mt-4">
-                <label className="form-label">Observaciones:</label>
-                <textarea
-                    className="form-control"
-                    value={observaciones}
-                    onChange={(e) => setObservaciones(e.target.value)}
-                ></textarea>
+            <div className="mt-3 d-flex justify-content-between">
+                <button
+                    className="btn btn-secondary"
+                    onClick={() => imprimirSolicitud(solicitud)}
+                >
+                    Imprimir
+                </button>
+                <button
+                    className="btn btn-danger"
+                    onClick={() => navigate(-1)}
+                >
+                    Regresar
+                </button>
             </div>
-
         </div>
     );
-}
+};
 
 export default DetallesSolicitud;

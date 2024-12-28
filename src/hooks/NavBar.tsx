@@ -46,9 +46,6 @@ const NavBar: React.FC = () => {
     navigate(-1); // Navegar a la página anterior
   };
 
-  // Comprobar si estamos en la ruta de detalles de la solicitud
-  const esRutaDetalles = location.pathname.startsWith("/detalles-solicitud");
-
   return (
     <nav className={`navbar navbar-expand-lg ${isDarkMode ? "navbar-dark bg-dark" : "navbar-light bg-light"}`}>
       <div className="container-fluid">
@@ -90,8 +87,8 @@ const NavBar: React.FC = () => {
               </li>
             )}
 
-            {/* Mostrar el botón "Regresar" solo en la página de detalles de la solicitud */}
-            {esRutaDetalles && (
+            {/* Mostrar el botón "Regresar" solo en la página de solicitudes */}
+            {location.pathname === "/solicitudes-por-usuario" && (
               <li className="nav-item">
                 <button
                   className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}

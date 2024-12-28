@@ -198,7 +198,13 @@ const GestionSolicitudes: React.FC = () => {
 
   const aceptarSolicitud = (id: number) => navigate(`/aprobar-solicitud/${id}`);
   const rechazarSolicitud = (id: number) => navigate(`/rechazar-solicitud/${id}`);
-  const detallesSolicitud = (id: number) => navigate(`/detalles-solicitud/${id}`);
+
+  const detallesSolicitud = (solicitud: Solicitud) => {
+    navigate(`/detalles-solicitud/${solicitud.id}`, {
+      state: { solicitud } // Pasar la solicitud completa como estado
+    });
+  };
+  
   const eliminarSolicitud = async (id: number) => {
     console.log("ID de solicitud a eliminar:", id);
 
@@ -545,12 +551,12 @@ const GestionSolicitudes: React.FC = () => {
                   </button>
                   <button
                     className="btn btn-primary me-2"
-                    onClick={() => detallesSolicitud(solicitud.id)}
+                    onClick={() => detallesSolicitud(solicitud)}
                   >
                     Detalles
                   </button>
                   <button
-                    className="btn btn-info"
+                    className="btn btn-secondary"
                     onClick={() => imprimirSolicitud(solicitud)}
                   >
                     Imprimir

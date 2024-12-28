@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Solicitud {
   id: number;
@@ -9,6 +10,7 @@ interface Solicitud {
   observaciones: string;
   descripcionServicio: string;
   areaSolicitante: number; // Cambiado a number para relacionar con el ID
+  usuarioSolicitante: number; // Cambiado a number para relacionar con el ID
 }
 
 interface Area {
@@ -16,11 +18,17 @@ interface Area {
   nombreArea: string;
 }
 
+interface Usuario {
+  id: number;
+  nombreUsuario: string;
+  rol: string;
+}
 
 const SolicitudesPorUsuario: React.FC = () => {
   const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
   const [error, setError] = useState<string>('');
   const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [ordenFecha, setOrdenFecha] = useState<"asc" | "desc" | null>(null);
   const [paginaActual, setPaginaActual] = useState(1);
@@ -29,6 +37,8 @@ const SolicitudesPorUsuario: React.FC = () => {
   const [filtroMes, setFiltroMes] = useState<number | null>(null);
   const [accionSeleccionada, setAccionSeleccionada] = useState<string>('');
   const [areas, setAreas] = useState<Area[]>([]);
+
+  const navigate = useNavigate();
 
 
   useEffect(() => {
@@ -68,6 +78,41 @@ const SolicitudesPorUsuario: React.FC = () => {
       const area = areas.find((area) => area.idArea === id);
       return area ? area.nombreArea : "No definida";
     };
+
+    useEffect(() => {
+        const obtenerUsuarios = async () => {
+          try {
+            const response = await fetch("https://localhost:7094/api/Usuario/Listar");
+            if (!response.ok) {
+              throw new Error("Error al obtener los usuarios.");
+            }
+    
+            const data = await response.json();
+            console.log("Usuarios cargados:", data.obj);  // Log para verificar los datos
+    
+            // Filtrar solo los usuarios con rol "Usuario"
+            const usuariosFiltrados = data.obj.filter((usuario: Usuario) => usuario.rol === "Usuario");
+    
+            setUsuarios(usuariosFiltrados);
+          } catch (error: any) {
+            console.error("Error al cargar los usuarios:", error);
+            setError(error.message || "Hubo un problema al cargar los usuarios.");
+          }
+        };
+    
+        obtenerUsuarios();
+      }, []);
+    
+    
+      useEffect(() => {
+        console.log("Estado de usuarios actualizado:", usuarios);
+      }, [usuarios]);
+    
+      const obtenerNombreUsuario = (id: number) => {
+        console.log("Usuarios disponibles:", usuarios);
+        const usuario = usuarios.find((usuario) => usuario.id === id);
+        return usuario ? usuario.nombreUsuario : "No definido";
+      };
 
   useEffect(() => {
     const obtenerSolicitudes = async () => {
@@ -166,6 +211,15 @@ const SolicitudesPorUsuario: React.FC = () => {
     }
   };
 
+  const detallesSolicitud = (solicitud: Solicitud) => {
+    navigate(`/detalles-solicitud/${solicitud.id}`, {
+      state: { solicitud } // Pasar la solicitud completa como estado
+    });
+  };
+  
+  
+  
+
   const formatDateTime = (isoDate: string): string => {
     const date = new Date(isoDate);
     const formattedDate = date.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -173,34 +227,46 @@ const SolicitudesPorUsuario: React.FC = () => {
     return `${formattedDate} - ${formattedTime}`;
   };
 
-  const mostrarDetalles = (id: number) => {
-    alert(`Mostrando detalles de la solicitud con ID: ${id}`);
-  };
-
-  const printWindow = (solicitud: Solicitud) => {
-    const printContent = `
-      <html>
-      <head>
-        <title>Imprimir Solicitud</title>
-      </head>
-      <body>
-        <h1>Solicitud</h1>
-        <p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>
-        <p><strong>Fecha de Solicitud:</strong> ${solicitud.fechaSolicitud}</p>
-        <p><strong>Área Solicitante:</strong> ${solicitud.areaSolicitante}</p>
-        <p><strong>Tipo de Solicitud:</strong> ${solicitud.tipoSolicitud}</p>
-        <p><strong>Estado:</strong> ${solicitud.estado}</p>
-        <p><strong>Descripción del Servicio:</strong> ${solicitud.descripcionServicio}</p>
-        <p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>
-      </body>
-      </html>
-    `;
-    const newWindow = window.open('', '_blank', 'width=800,height=600');
-    if (newWindow) {
-      newWindow.document.open();
-      newWindow.document.write(printContent);
-      newWindow.document.close();
-      newWindow.print();
+  const imprimirSolicitud = (solicitud: Solicitud) => {
+    const printWindow = window.open("", "", "height=600,width=800");
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Imprimir solicitud</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+              }
+              .text-end {
+                text-align: right;
+              }
+              .details {
+                margin: 10px 0;
+              }
+            </style>
+          </head>
+          <body>
+            <h2 class="text-end">Solicitud de ${solicitud.tipoSolicitud}</h2>
+            <div class="details">
+              <p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>
+              <p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>
+              <p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>
+              <p><strong>Estado:</strong> ${solicitud.estado}</p>
+              <p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>
+              <p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
+              ${
+                solicitud.estado === "Rechazada" || solicitud.estado === "Atendida"
+                  ? `<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`
+                  : ""
+              }
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
     }
   };
 
@@ -435,13 +501,13 @@ const SolicitudesPorUsuario: React.FC = () => {
                     </button>
                     <button
                       className="btn btn-primary me-2"
-                      onClick={() => mostrarDetalles(solicitud.id)}
+                      onClick={() => detallesSolicitud(solicitud)}
                     >
                       Detalles
                     </button>
                     <button
                       className="btn btn-secondary"
-                      onClick={() => printWindow(solicitud)}
+                      onClick={() => imprimirSolicitud(solicitud)}
                     >
                       Imprimir
                     </button>
