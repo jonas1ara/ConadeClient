@@ -99,6 +99,30 @@ const NavBar: React.FC = () => {
               </li>
             )}
 
+             {/* Mostrar el botón "Regresar" solo en la página de gestion-solicitudes */}
+             {rol === "Admin" && location.pathname === "/gestion-solicitudes" && (
+              <li className="nav-item">
+                <button
+                  className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
+                  onClick={manejarRegresar}
+                >
+                  Regresar
+                </button>
+              </li>
+            )}
+
+            {/* Mostrar el botón "Regresar" solo en la página de gestion-usuarios */}
+            {rol === "Admin" && location.pathname === "/gestion-usuarios" && (
+              <li className="nav-item">
+                <button
+                  className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
+                  onClick={manejarRegresar}
+                >
+                  Regresar
+                </button>
+              </li>
+            )}
+
             <li className="nav-item">
               <button className="btn btn-danger ms-1" onClick={manejarCerrarSesion}>
                 Cerrar Sesión
