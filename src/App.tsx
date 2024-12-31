@@ -2,7 +2,7 @@ import UseTheme from './hooks/UseTheme';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./componentesUsuarios/Login";
 import RegistroUsuario from "./componentesUsuarios/RegistroUsuario";
-import PanelPrincipal from "./componentesServicios/PanelPrincipal";
+import PanelPrincipalUsuarios from "./componentesUsuarios/PanelPrincipalUsuarios";
 import Mantenimiento from "./componentesServicios/Mantenimiento";
 import ServicioPostal from "./componentesServicios/ServicioPostal";
 import ServicioTransporte from "./componentesServicios/ServicioTransporte";
@@ -13,6 +13,8 @@ import SolicitudesPorUsuario from "./componentesSolicitudes/SolicitudesPorUsuari
 import AprobarSolicitud from "./componentesSolicitudes/AprobarSolicitud";
 import RechazarSolicitud from "./componentesSolicitudes/RechazarSolicitud";
 import DetallesSolicitud from './componentesSolicitudes/DetallesSolicitud';
+import GestionUsuarios from './componentesUsuarios/GestionUsuarios';
+import PanelPrincipalAdministradores from './componentesUsuarios/PanelPrincipalAdministradores';
 
 function App() {
   UseTheme(); // Aplicar el tema automáticamente
@@ -33,14 +35,25 @@ function App() {
 
         {/* Rutas protegidas (requieren que el usuario esté autenticado) */}
         <Route 
-          path="/panel-principal" 
+          path="/panel-principal-usuarios" 
           element={isAuthenticated() ? (
             <>
               <NavBar/>
-              <PanelPrincipal />
+              <PanelPrincipalUsuarios />
             </>
           ) : <Navigate to="/" />} 
         />
+
+<Route 
+          path="/panel-principal-administradores" 
+          element={isAuthenticated() ? (
+            <>
+              <NavBar/>
+              <PanelPrincipalAdministradores/>
+            </>
+          ) : <Navigate to="/" />} 
+        />
+
 
         <Route 
           path="/gestion-solicitudes" 
@@ -131,6 +144,17 @@ function App() {
             </>
           ) : <Navigate to="/" />} 
         />
+
+<Route 
+          path="/gestion-usuarios" 
+          element={isAuthenticated() ? (
+            <>
+              <NavBar />
+              <GestionUsuarios />
+            </>
+          ) : <Navigate to="/" />} 
+        />
+        
 
         {/* Redirige al login si la ruta no existe */}
         <Route path="*" element={<Login />} />

@@ -297,7 +297,7 @@ const SolicitudesPorUsuario: React.FC = () => {
               <tr>
                 <td>${solicitud.numeroDeSerie}</td>
                 <td>${formatDateTime(solicitud.fechaSolicitud)}</td>
-                <td>${solicitud.areaSolicitante}</td>
+                <td>${obtenerNombreArea(solicitud.areaSolicitante)}</td>
                 <td>${solicitud.tipoSolicitud}</td>
                 <td>${solicitud.estado}</td>
                 <td>${solicitud.descripcionServicio}</td>
@@ -334,7 +334,7 @@ const SolicitudesPorUsuario: React.FC = () => {
     const rows = solicitudesFiltradas.map((solicitud) => [
       solicitud.numeroDeSerie,
       formatDateTime(solicitud.fechaSolicitud),
-      solicitud.areaSolicitante,
+      obtenerNombreArea(solicitud.areaSolicitante),
       solicitud.tipoSolicitud,
       solicitud.estado,
       solicitud.descripcionServicio,

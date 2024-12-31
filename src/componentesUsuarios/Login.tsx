@@ -18,9 +18,9 @@ const Login: React.FC = () => {
     if (storedUsername && storedAreaId && storedRol) {
       // Si ya hay un usuario en el localStorage, se redirige dependiendo de su rol
       if (storedRol === "Admin") {
-        navigate("/gestion-solicitudes");
+        navigate("/panel-principal-administradores");
       } else if (storedRol === "Usuario") {
-        navigate("/panel-principal");
+        navigate("/panel-principal-usuarios");
       }
     }
   }, [navigate]);
@@ -56,10 +56,10 @@ const Login: React.FC = () => {
         // Redirigir según el rol
         if (usuario.rol === "Admin") {
           setSuccessMessage("Bienvenido, Admin!");
-          navigate("/gestion-solicitudes");
+          navigate("/panel-principal-administradores");
         } else if (usuario.rol === "Usuario") {
           setSuccessMessage("Bienvenido!");
-          navigate("/panel-principal");
+          navigate("/panel-principal-usuarios");
         }
       }
     } catch (error: any) {

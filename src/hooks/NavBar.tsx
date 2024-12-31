@@ -32,9 +32,9 @@ const NavBar: React.FC = () => {
 
   const manejarNavegacion = () => {
     if (rol === "Usuario") {
-      navigate("/panel-principal");
+      navigate("/panel-principal-servicios");
     } else if (rol === "Admin") {
-      navigate("/gestion-solicitudes");
+      navigate("/panel-principal-solicitudes");
     }
   };
 

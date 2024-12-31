@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const PanelPrincipal: React.FC = () => {
+const PanelPrincipalUsuarios: React.FC = () => {
   const [usuario, setUsuario] = useState<string>("");
   const navigate = useNavigate();
 
@@ -90,4 +90,4 @@ const PanelPrincipal: React.FC = () => {
   );
 };
 
-export default PanelPrincipal;
+export default PanelPrincipalUsuarios;
