@@ -6,7 +6,7 @@ const NavBar: React.FC = () => {
   const [rol, setRol] = useState<string | null>(null);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const navigate = useNavigate();
-  const location = useLocation(); // Obtener la ubicación actual
+  const location = useLocation();
 
   useEffect(() => {
     const usuarioActual = localStorage.getItem("usuario");
