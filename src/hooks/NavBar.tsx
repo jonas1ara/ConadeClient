@@ -43,7 +43,7 @@ const NavBar: React.FC = () => {
   };
 
   const manejarRegresar = () => {
-    navigate(-1); // Navegar a la página anterior
+    navigate("/panel-principal-administradores"); // Navegar a la página anterior
   };
 
   return (
