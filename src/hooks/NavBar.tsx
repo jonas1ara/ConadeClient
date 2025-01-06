@@ -12,13 +12,26 @@ const NavBar: React.FC = () => {
     const usuarioActual = localStorage.getItem("usuario");
     const rolActual = localStorage.getItem("rol");
 
-    const theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    setIsDarkMode(theme === "dark");
-    document.documentElement.setAttribute("data-bs-theme", theme);
-    localStorage.setItem("theme", theme);
+    // Configuración inicial del tema basado en preferencias del sistema
+    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+    const applyTheme = (dark: boolean) => {
+      const theme = dark ? "dark" : "light";
+      setIsDarkMode(dark);
+      document.documentElement.setAttribute("data-bs-theme", theme);
+      localStorage.setItem("theme", theme);
+    };
+
+    applyTheme(systemTheme.matches);
+
+    // Escuchar cambios en el sistema y actualizar el tema automáticamente
+    const handleThemeChange = (e: MediaQueryListEvent) => applyTheme(e.matches);
+    systemTheme.addEventListener("change", handleThemeChange);
 
     setUsuario(usuarioActual);
     setRol(rolActual);
+
+    // Limpieza del event listener al desmontar el componente
+    return () => systemTheme.removeEventListener("change", handleThemeChange);
   }, []);
 
   const manejarCerrarSesion = () => {
@@ -42,8 +55,12 @@ const NavBar: React.FC = () => {
     navigate("/solicitudes-por-usuario");
   };
 
-  const manejarRegresar = () => {
-    navigate("/panel-principal-administradores"); // Navegar a la página anterior
+  const manejarRegresarUsuario = () => {
+    navigate("/panel-principal-usuarios");
+  };
+
+  const manejarRegresarAdministradores = () => {
+    navigate("/panel-principal-administradores");
   };
 
   return (
@@ -74,54 +91,50 @@ const NavBar: React.FC = () => {
                 {usuario ? `Bienvenido, ${usuario}` : "Bienvenido"}
               </span>
             </li>
-
-            {/* Mostrar el botón "Solicitudes" solo si el rol es "Usuario" */}
-            {rol === "Usuario" && location.pathname !== "/solicitudes-por-usuario" && (
-              <li className="nav-item">
-                <button
-                  className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
-                  onClick={manejarVerSolicitudes}
-                >
-                  Solicitudes
-                </button>
-              </li>
-            )}
-
-            {/* Mostrar el botón "Regresar" solo en la página de solicitudes */}
+            {rol === "Usuario" &&
+              !["/solicitudes-por-usuario", "/servicio-postal", "/servicio-transporte", "/mantenimiento", "/eventos", "/combustible"].includes(location.pathname) && (
+                <li className="nav-item">
+                  <button
+                    className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
+                    onClick={manejarVerSolicitudes}
+                  >
+                    Solicitudes
+                  </button>
+                </li>
+              )}
             {location.pathname === "/solicitudes-por-usuario" && (
               <li className="nav-item">
                 <button
                   className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
-                  onClick={manejarRegresar}
+                  onClick={manejarRegresarUsuario}
                 >
                   Regresar
                 </button>
               </li>
             )}
 
-             {/* Mostrar el botón "Regresar" solo en la página de gestion-solicitudes */}
-             {rol === "Admin" && location.pathname === "/gestion-solicitudes" && (
+            {rol === "Admin" && location.pathname === "/gestion-solicitudes" && (
               <li className="nav-item">
                 <button
                   className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
-                  onClick={manejarRegresar}
+                  onClick={manejarRegresarAdministradores}
                 >
                   Regresar
                 </button>
               </li>
             )}
 
-            {/* Mostrar el botón "Regresar" solo en la página de gestion-usuarios */}
             {rol === "Admin" && location.pathname === "/gestion-usuarios" && (
               <li className="nav-item">
                 <button
                   className={`btn ${isDarkMode ? "btn-outline-light" : "btn-outline-dark"} me-1`}
-                  onClick={manejarRegresar}
+                  onClick={manejarRegresarAdministradores}
                 >
                   Regresar
                 </button>
               </li>
             )}
+
 
             <li className="nav-item">
               <button className="btn btn-danger ms-1" onClick={manejarCerrarSesion}>

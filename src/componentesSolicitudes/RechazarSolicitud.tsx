@@ -7,10 +7,25 @@ interface Solicitud {
     fechaSolicitud: string;
     tipoSolicitud: string;
     estado: string;
-    observaciones: string;
+    observaciones: string | null;
     areaSolicitante: number;
-    descripcionServicio: string;
-    usuarioSolicitante: number; // Para relacionar con el ID del usuario
+    descripcionServicio: string | null;
+    usuarioSolicitante: number;
+    areaId: number;
+    tipoServicio?: string;
+    tipoDeServicio?: string;
+    fechaInicio?: string;
+    fechaEntrega?: string;
+    fechaEnvio?: string;
+    fechaRecepcionMaxima?: string;
+    fechaTransporte?: string;
+    fechaTransporteVuelta?: string;
+    fechaFin?: string;
+    origen?: string;
+    destino?: string;
+    sala?: string;
+    horarioInicio?: string;
+    horarioFin?: string;
 }
 
 interface Area {
@@ -120,6 +135,48 @@ const RechazarSolicitud: React.FC = () => {
         return `${formattedDate} - ${formattedTime}`;
     };
 
+    const renderCamposEspecificos = () => {
+        switch (solicitud?.tipoSolicitud) {
+            case "Mantenimiento":
+                return (
+                    <>
+                        {solicitud.tipoServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoServicio}</p>}
+                        {solicitud.fechaInicio && <p><strong>Fecha de Inicio:</strong> {formatDateTime(solicitud.fechaInicio)}</p>}
+                        {solicitud.fechaEntrega && <p><strong>Fecha de Entrega:</strong> {formatDateTime(solicitud.fechaEntrega)}</p>}
+                    </>
+                );
+            case "Servicio Postal":
+                return (
+                    <>
+                        {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
+                        {solicitud.fechaEnvio && <p><strong>Fecha de Envío:</strong> {formatDateTime(solicitud.fechaEnvio)}</p>}
+                        {solicitud.fechaRecepcionMaxima && <p><strong>Fecha de Recepción Máxima:</strong> {formatDateTime(solicitud.fechaRecepcionMaxima)}</p>}
+                    </>
+                );
+            case "Servicio Transporte":
+                return (
+                    <>
+                        {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
+                        {solicitud.fechaTransporte && <p><strong>Fecha de Transporte:</strong> {formatDateTime(solicitud.fechaTransporte)}</p>}
+                        {solicitud.origen && <p><strong>Origen:</strong> {solicitud.origen}</p>}
+                        {solicitud.destino && <p><strong>Destino:</strong> {solicitud.destino}</p>}
+                    </>
+                );
+            case "Uso Inmobiliario":
+                return (
+                    <>
+                        {solicitud.sala && <p><strong>Sala:</strong> {solicitud.sala}</p>}
+                        {solicitud.fechaInicio && <p><strong>Fecha de Inicio:</strong> {formatDateTime(solicitud.fechaInicio)}</p>}
+                        {solicitud.fechaFin && <p><strong>Fecha de Fin:</strong> {formatDateTime(solicitud.fechaFin)}</p>}
+                        {solicitud.horarioInicio && <p><strong>Horario de Inicio:</strong> {solicitud.horarioInicio}</p>}
+                        {solicitud.horarioFin && <p><strong>Horario de Fin:</strong> {solicitud.horarioFin}</p>}
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
+
     const rechazarSolicitud = async () => {
         try {
             setError(""); // Limpiamos el mensaje de error
@@ -204,8 +261,8 @@ const RechazarSolicitud: React.FC = () => {
                     <p><strong>Fecha de Solicitud:</strong> {formatDateTime(solicitud.fechaSolicitud)}</p>
                     <p><strong>Área Solicitante:</strong> {obtenerNombreArea(solicitud.areaSolicitante)}</p>
                     <p><strong>Usuario Solicitante:</strong> {obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
-                    <p><strong>Tipo de Solicitud:</strong> {solicitud.tipoSolicitud}</p>
                     <p><strong>Estado:</strong> {solicitud.estado}</p>
+                    {renderCamposEspecificos()}
                     <p><strong>Descripción de Servicio:</strong> {solicitud.descripcionServicio}</p>
                 </div>
             </div>

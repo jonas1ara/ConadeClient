@@ -7,11 +7,25 @@ interface Solicitud {
     fechaSolicitud: string;
     tipoSolicitud: string;
     estado: string;
-    observaciones: string;
+    observaciones: string | null;
     areaSolicitante: number;
-    descripcionServicio: string;
+    descripcionServicio: string | null;
     usuarioSolicitante: number;
     areaId: number;
+    tipoServicio?: string;
+    tipoDeServicio?: string;
+    fechaInicio?: string;
+    fechaEntrega?: string;
+    fechaEnvio?: string;
+    fechaRecepcionMaxima?: string;
+    fechaTransporte?: string;
+    fechaTransporteVuelta?: string;
+    fechaFin?: string;
+    origen?: string;
+    destino?: string;
+    sala?: string;
+    horarioInicio?: string;
+    horarioFin?: string;
 }
 
 interface Area {
@@ -25,8 +39,8 @@ interface Usuario {
 }
 
 const DetallesSolicitud: React.FC = () => {
-    const { state } = useLocation();  // Obtener el estado de la navegación
-    const solicitud = state?.solicitud as Solicitud | null;  // Asegurarse de que la solicitud esté presente
+    const { state } = useLocation();
+    const solicitud = state?.solicitud as Solicitud | null;
     const [areas, setAreas] = useState<Area[]>([]);
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
     const [error, setError] = useState<string>("");
@@ -83,7 +97,85 @@ const DetallesSolicitud: React.FC = () => {
         return `${formattedDate} - ${formattedTime}`;
     };
 
+    const renderCamposEspecificos = () => {
+        switch (solicitud?.tipoSolicitud) {
+            case "Mantenimiento":
+                return (
+                    <>
+                        {solicitud.tipoServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoServicio}</p>}
+                        {solicitud.fechaInicio && <p><strong>Fecha de Inicio:</strong> {formatDateTime(solicitud.fechaInicio)}</p>}
+                        {solicitud.fechaEntrega && <p><strong>Fecha de Entrega:</strong> {formatDateTime(solicitud.fechaEntrega)}</p>}
+                    </>
+                );
+            case "Servicio Postal":
+                return (
+                    <>
+                        {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
+                        {solicitud.fechaEnvio && <p><strong>Fecha de Envío:</strong> {formatDateTime(solicitud.fechaEnvio)}</p>}
+                        {solicitud.fechaRecepcionMaxima && <p><strong>Fecha de Recepción Máxima:</strong> {formatDateTime(solicitud.fechaRecepcionMaxima)}</p>}
+                    </>
+                );
+            case "Servicio Transporte":
+                return (
+                    <>
+                        {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
+                        {solicitud.fechaTransporte && <p><strong>Fecha de Transporte:</strong> {formatDateTime(solicitud.fechaTransporte)}</p>}
+                        {solicitud.origen && <p><strong>Origen:</strong> {solicitud.origen}</p>}
+                        {solicitud.destino && <p><strong>Destino:</strong> {solicitud.destino}</p>}
+                    </>
+                );
+            case "Uso Inmobiliario":
+                return (
+                    <>
+                        {solicitud.sala && <p><strong>Sala:</strong> {solicitud.sala}</p>}
+                        {solicitud.fechaInicio && <p><strong>Fecha de Inicio:</strong> {formatDateTime(solicitud.fechaInicio)}</p>}
+                        {solicitud.fechaFin && <p><strong>Fecha de Fin:</strong> {formatDateTime(solicitud.fechaFin)}</p>}
+                        {solicitud.horarioInicio && <p><strong>Horario de Inicio:</strong> {solicitud.horarioInicio}</p>}
+                        {solicitud.horarioFin && <p><strong>Horario de Fin:</strong> {solicitud.horarioFin}</p>}
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
+
     const imprimirSolicitud = (solicitud: Solicitud) => {
+
+        const renderCamposEspecificos = () => {
+            switch (solicitud.tipoSolicitud) {
+                case "Servicio Postal":
+                    return `
+                        <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
+                        <p><strong>Fecha de Envío:</strong> ${solicitud.fechaEnvio ? formatDateTime(solicitud.fechaEnvio) : "No especificada"}</p>
+                        <p><strong>Fecha Recepción Máxima:</strong> ${solicitud.fechaRecepcionMaxima ? formatDateTime(solicitud.fechaRecepcionMaxima) : "No especificada"}</p>
+                    `;
+                case "Servicio Transporte":
+                    return `
+                        <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
+                        <p><strong>Fecha Transporte:</strong> ${solicitud.fechaTransporte ? formatDateTime(solicitud.fechaTransporte) : "No especificada"}</p>
+                        <p><strong>Fecha Transporte de Vuelta:</strong> ${solicitud.fechaTransporteVuelta ? formatDateTime(solicitud.fechaTransporteVuelta) : "No especificada"}</p>
+                        <p><strong>Origen:</strong> ${solicitud.origen || "No especificado"}</p>
+                        <p><strong>Destino:</strong> ${solicitud.destino || "No especificado"}</p>
+                    `;
+                case "Mantenimiento":
+                    return `
+                        <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoServicio || "No especificado"}</p>
+                        <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
+                        <p><strong>Fecha de Entrega:</strong> ${solicitud.fechaEntrega ? formatDateTime(solicitud.fechaEntrega) : "No especificada"}</p>
+                    `;
+                case "Uso Inmobiliario":
+                    return `
+                        <p><strong>Sala:</strong> ${solicitud.sala || "No especificada"}</p>
+                        <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
+                        <p><strong>Fecha de Fin:</strong> ${solicitud.fechaFin ? formatDateTime(solicitud.fechaFin) : "No especificada"}</p>
+                        <p><strong>Horario de Inicio:</strong> ${solicitud.horarioInicio || "No especificado"}</p>
+                        <p><strong>Horario de Fin:</strong> ${solicitud.horarioFin || "No especificado"}</p>
+                    `;
+                default:
+                    return "";
+            }
+        };
+
         const printWindow = window.open("", "", "height=600,width=800");
         if (printWindow) {
             printWindow.document.write(`
@@ -109,14 +201,17 @@ const DetallesSolicitud: React.FC = () => {
                         <p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>
                         <p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>
                         <p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>
-                        <p><strong>Estado:</strong> ${solicitud.estado}</p>
-                        <p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>
                         <p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
-                        ${
-                            solicitud.estado === "Rechazada" || solicitud.estado === "Atendida"
-                            ? `<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`
-                            : ""
-                        }
+                        <p><strong>Estado:</strong> ${solicitud.estado}</p>
+
+                        ${renderCamposEspecificos()}
+
+                        <p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>
+                        
+                        ${solicitud.estado === "Rechazada" || solicitud.estado === "Atendida"
+                    ? `<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`
+                    : ""
+                }
                     </div>
                 </body>
             </html>
@@ -126,6 +221,7 @@ const DetallesSolicitud: React.FC = () => {
         }
     };
 
+
     if (!solicitud) {
         return <div>Cargando solicitud...</div>;
     }
@@ -134,7 +230,7 @@ const DetallesSolicitud: React.FC = () => {
         <div className="mt-4">
             <h2 className="text-center mb-4">Detalles de la Solicitud</h2>
             {error && <div className="alert alert-danger text-center">{error}</div>}
-            
+
             <div className="card">
                 <div className="card-body">
                     <h5 className="card-title text-end">Solicitud de {solicitud.tipoSolicitud}</h5>
@@ -142,12 +238,15 @@ const DetallesSolicitud: React.FC = () => {
                     <p><strong>Fecha de Solicitud:</strong> {formatDateTime(solicitud.fechaSolicitud)}</p>
                     <p><strong>Área Solicitante:</strong> {obtenerNombreArea(solicitud.areaSolicitante)}</p>
                     <p><strong>Usuario Solicitante:</strong> {obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
-                    <p><strong>Tipo de Solicitud:</strong> {solicitud.tipoSolicitud}</p>
                     <p><strong>Estado:</strong> {solicitud.estado}</p>
-                    <p><strong>Descripción de Servicio:</strong> {solicitud.descripcionServicio}</p>
-                    {solicitud.estado !== "Solicitada" && (
+                    {renderCamposEspecificos()}
+                    {solicitud.descripcionServicio && (
+                        <p><strong>Descripción de Servicio:</strong> {solicitud.descripcionServicio}</p>
+                    )}
+                    {solicitud.observaciones && (
                         <p><strong>Observaciones: </strong> {solicitud.observaciones}</p>
                     )}
+
                 </div>
             </div>
 

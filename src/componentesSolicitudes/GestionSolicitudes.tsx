@@ -7,12 +7,26 @@ interface Solicitud {
   fechaSolicitud: string;
   tipoSolicitud: string;
   estado: string;
-  areaSolicitante: number; // Cambiado a number para relacionar con el ID
-  usuarioSolicitante: number; // Cambiado a number para relacionar con el ID
-  descripcionServicio: string;
-  observaciones: string;
+  observaciones: string | null;
+  areaSolicitante: number;
+  descripcionServicio: string | null;
+  usuarioSolicitante: number;
+  areaId: number;
+  tipoServicio?: string;
+  tipoDeServicio?: string;
+  fechaInicio?: string;
+  fechaEntrega?: string;
+  fechaEnvio?: string;
+  fechaRecepcionMaxima?: string;
+  fechaTransporte?: string;
+  fechaTransporteVuelta?: string;
+  fechaFin?: string;
+  origen?: string;
+  destino?: string;
+  sala?: string;
+  horarioInicio?: string;
+  horarioFin?: string;
 }
-
 interface Area {
   idArea: number;
   nombreArea: string;
@@ -204,7 +218,7 @@ const GestionSolicitudes: React.FC = () => {
       state: { solicitud } // Pasar la solicitud completa como estado
     });
   };
-  
+
   const eliminarSolicitud = async (id: number) => {
     console.log("ID de solicitud a eliminar:", id);
 
@@ -251,48 +265,86 @@ const GestionSolicitudes: React.FC = () => {
   };
 
   const imprimirSolicitud = (solicitud: Solicitud) => {
+
+    const renderCamposEspecificos = () => {
+      switch (solicitud.tipoSolicitud) {
+        case "Servicio Postal":
+          return `
+                    <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
+                    <p><strong>Fecha de Envío:</strong> ${solicitud.fechaEnvio ? formatDateTime(solicitud.fechaEnvio) : "No especificada"}</p>
+                    <p><strong>Fecha Recepción Máxima:</strong> ${solicitud.fechaRecepcionMaxima ? formatDateTime(solicitud.fechaRecepcionMaxima) : "No especificada"}</p>
+                `;
+        case "Servicio Transporte":
+          return `
+                    <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
+                    <p><strong>Fecha Transporte:</strong> ${solicitud.fechaTransporte ? formatDateTime(solicitud.fechaTransporte) : "No especificada"}</p>
+                    <p><strong>Fecha Transporte de Vuelta:</strong> ${solicitud.fechaTransporteVuelta ? formatDateTime(solicitud.fechaTransporteVuelta) : "No especificada"}</p>
+                    <p><strong>Origen:</strong> ${solicitud.origen || "No especificado"}</p>
+                    <p><strong>Destino:</strong> ${solicitud.destino || "No especificado"}</p>
+                `;
+        case "Mantenimiento":
+          return `
+                    <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoServicio || "No especificado"}</p>
+                    <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
+                    <p><strong>Fecha de Entrega:</strong> ${solicitud.fechaEntrega ? formatDateTime(solicitud.fechaEntrega) : "No especificada"}</p>
+                `;
+        case "Uso Inmobiliario":
+          return `
+                    <p><strong>Sala:</strong> ${solicitud.sala || "No especificada"}</p>
+                    <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
+                    <p><strong>Fecha de Fin:</strong> ${solicitud.fechaFin ? formatDateTime(solicitud.fechaFin) : "No especificada"}</p>
+                    <p><strong>Horario de Inicio:</strong> ${solicitud.horarioInicio || "No especificado"}</p>
+                    <p><strong>Horario de Fin:</strong> ${solicitud.horarioFin || "No especificado"}</p>
+                `;
+        default:
+          return "";
+      }
+    };
+
     const printWindow = window.open("", "", "height=600,width=800");
     if (printWindow) {
       printWindow.document.write(`
         <html>
-          <head>
-            <title>Imprimir solicitud</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                margin: 20px;
-              }
-              .text-end {
-                text-align: right;
-              }
-              .details {
-                margin: 10px 0;
-              }
-            </style>
-          </head>
-          <body>
-            <h2 class="text-end">Solicitud de ${solicitud.tipoSolicitud}</h2>
-            <div class="details">
-              <p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>
-              <p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>
-              <p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>
-              <p><strong>Estado:</strong> ${solicitud.estado}</p>
-              <p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>
-              <p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
-              ${
-                solicitud.estado === "Rechazada" || solicitud.estado === "Atendida"
-                  ? `<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`
-                  : ""
-              }
-            </div>
-          </body>
+            <head>
+                <title>Imprimir solicitud</title>
+                <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 20px;
+                }
+                .text-end {
+                    text-align: right;
+                }
+                .details {
+                    margin: 10px 0;
+                }
+                </style>
+            </head>
+            <body>
+                <h2 class="text-end">Solicitud de ${solicitud.tipoSolicitud}</h2>
+                <div class="details">
+                    <p><strong>Número de Serie:</strong> ${solicitud.numeroDeSerie}</p>
+                    <p><strong>Fecha de Solicitud:</strong> ${formatDateTime(solicitud.fechaSolicitud)}</p>
+                    <p><strong>Área Solicitante:</strong> ${obtenerNombreArea(solicitud.areaSolicitante)}</p>
+                    <p><strong>Usuario Solicitante:</strong> ${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</p>
+                    <p><strong>Estado:</strong> ${solicitud.estado}</p>
+
+                    ${renderCamposEspecificos()}
+
+                    <p><strong>Descripción de Servicio:</strong> ${solicitud.descripcionServicio}</p>
+                    
+                    ${solicitud.estado === "Rechazada" || solicitud.estado === "Atendida"
+          ? `<p><strong>Observaciones:</strong> ${solicitud.observaciones}</p>`
+          : ""
+        }
+                </div>
+            </body>
         </html>
-      `);
+        `);
       printWindow.document.close();
       printWindow.print();
     }
   };
-  
 
 
   const imprimirTodasLasSolicitudes = () => {
@@ -309,6 +361,7 @@ const GestionSolicitudes: React.FC = () => {
                 <th>Número de Serie</th>
                 <th>Fecha de Solicitud</th>
                 <th>Área Solicitante</th>
+                <th>Usuario Solicitante</th>
                 <th>Tipo de Solicitud</th>
                 <th>Estado</th>
                 <th>Descripción del Servicio</th>
@@ -322,7 +375,8 @@ const GestionSolicitudes: React.FC = () => {
                 <tr>
                   <td>${solicitud.numeroDeSerie}</td>
                   <td>${formatDateTime(solicitud.fechaSolicitud)}</td>
-                  <td>${solicitud.areaSolicitante}</td>
+                  <td>${obtenerNombreArea(solicitud.areaSolicitante)}</td>
+                  <td>${obtenerNombreUsuario(solicitud.usuarioSolicitante)}</td>
                   <td>${solicitud.tipoSolicitud}</td>
                   <td>${solicitud.estado}</td>
                   <td>${solicitud.descripcionServicio}</td>
