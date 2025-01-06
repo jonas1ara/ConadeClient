@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 interface Usuario {
   id: number;
@@ -53,6 +54,14 @@ const Usuarios: React.FC = () => {
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
+      {/* Botón para registrar nuevo usuario */}
+      <div className="mb-3 text-end">
+        <Link to="/registro" className="btn btn-success">
+          Registrar Nuevo Usuario
+        </Link>
+      </div>
+
+
       <table className="table table-bordered">
         <thead>
           <tr>
@@ -87,14 +96,14 @@ const Usuarios: React.FC = () => {
                 <td>{usuario.area || "N/A"}</td>
                 <td>
                   <button
-                      className="btn btn-primary me-2"
-                      onClick={() => handleEditar(usuario.id)}
+                    className="btn btn-primary me-2"
+                    onClick={() => handleEditar(usuario.id)}
                   >
                     Editar
                   </button>
                   <button
-                      className="btn btn-danger me-2"
-                      onClick={() => handleEliminar(usuario.id)}
+                    className="btn btn-danger me-2"
+                    onClick={() => handleEliminar(usuario.id)}
                   >
                     Eliminar
                   </button>
@@ -112,6 +121,7 @@ const Usuarios: React.FC = () => {
       </table>
     </div>
   );
-};
+
+}
 
 export default Usuarios;

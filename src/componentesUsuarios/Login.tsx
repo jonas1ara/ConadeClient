@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
   const [username, setUsername] = useState<string>("");
@@ -108,9 +108,6 @@ const Login: React.FC = () => {
             <button type="submit" className="btn btn-primary" disabled={isLoading}>
               {isLoading ? "Cargando..." : "Iniciar Sesión"}
             </button>
-            <Link to="/registro" className="btn btn-secondary">
-              Registrar Usuario
-            </Link>
           </div>
         </form>
       </div>

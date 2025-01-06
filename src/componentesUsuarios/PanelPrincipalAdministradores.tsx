@@ -40,7 +40,7 @@ const PanelPrincipalAdministradores: React.FC = () => {
               <h5 className="card-title">Gestión de Usuarios</h5>
               <p className="card-text">Administra, edita y elimina perfiles de Usuarios.</p>
               <Link to="/gestion-usuarios" className="btn btn-primary">
-                Ir al Servicio Gestión de Usuarios
+                Ir a Gestión de Usuarios
               </Link>
             </div>
           </div>
