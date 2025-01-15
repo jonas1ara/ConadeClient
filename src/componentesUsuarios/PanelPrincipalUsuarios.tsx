@@ -79,7 +79,7 @@ const PanelPrincipalUsuarios: React.FC = () => {
             <div className="card-body text-center">
               <h5 className="card-title">Abastecimiento de Combustible</h5>
               <p className="card-text">Solicita abastecimiento de combustible para vehículos.</p>
-              <Link to="/abastecimiento-combustible" className="btn btn-primary">
+              <Link to="/combustible" className="btn btn-primary">
                Ir a Abastecimiento de Combustible
               </Link>
             </div>

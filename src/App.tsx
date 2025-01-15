@@ -7,6 +7,7 @@ import Mantenimiento from "./componentesServicios/Mantenimiento";
 import ServicioPostal from "./componentesServicios/ServicioPostal";
 import ServicioTransporte from "./componentesServicios/ServicioTransporte";
 import Eventos from "./componentesServicios/Eventos";
+import Combustible from './componentesServicios/Combustible';
 import NavBar from "./hooks/NavBar";
 import GestionSolicitudes from "./componentesSolicitudes/GestionSolicitudes"; // Importamos la nueva pantalla
 import SolicitudesPorUsuario from "./componentesSolicitudes/SolicitudesPorUsuario";
@@ -34,127 +35,137 @@ function App() {
         <Route path="/registro" element={<RegistroUsuario />} />
 
         {/* Rutas protegidas (requieren que el usuario esté autenticado) */}
-        <Route 
-          path="/panel-principal-usuarios" 
+        <Route
+          path="/panel-principal-usuarios"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
+              <NavBar />
               <PanelPrincipalUsuarios />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
 
-<Route 
-          path="/panel-principal-administradores" 
+        <Route
+          path="/panel-principal-administradores"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
-              <PanelPrincipalAdministradores/>
+              <NavBar />
+              <PanelPrincipalAdministradores />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
 
 
-        <Route 
-          path="/gestion-solicitudes" 
+        <Route
+          path="/gestion-solicitudes"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
+              <NavBar />
               <GestionSolicitudes />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
 
-        <Route 
-          path="/solicitudes-por-usuario" 
+        <Route
+          path="/solicitudes-por-usuario"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
+              <NavBar />
               <SolicitudesPorUsuario />
             </>
           ) : <Navigate to="/" />}
         />
 
-        <Route 
-          path="/aprobar-solicitud/:id" 
+        <Route
+          path="/aprobar-solicitud/:id"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
+              <NavBar />
               <AprobarSolicitud />
             </>
           ) : <Navigate to="/" />}
 
         />
 
-        <Route 
-          path="/rechazar-solicitud/:id" 
+        <Route
+          path="/rechazar-solicitud/:id"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
+              <NavBar />
               <RechazarSolicitud />
             </>
           ) : <Navigate to="/" />}
 
         />
 
-        <Route 
-          path="/detalles-solicitud/:id" 
+        <Route
+          path="/detalles-solicitud/:id"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
+              <NavBar />
               <DetallesSolicitud />
             </>
           ) : <Navigate to="/" />}
 
         />
 
-        <Route 
-          path="/servicio-postal" 
+        <Route
+          path="/servicio-postal"
           element={isAuthenticated() ? (
             <>
               <NavBar />
               <ServicioPostal />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
-        <Route 
-          path="/servicio-transporte" 
+        <Route
+          path="/servicio-transporte"
           element={isAuthenticated() ? (
             <>
               <NavBar />
               <ServicioTransporte />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
-        <Route 
-          path="/eventos" 
+        <Route
+          path="/eventos"
           element={isAuthenticated() ? (
             <>
-              <NavBar/>
+              <NavBar />
               <Eventos />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
-        <Route 
-          path="/mantenimiento" 
+        <Route
+          path="/mantenimiento"
           element={isAuthenticated() ? (
             <>
               <NavBar />
               <Mantenimiento />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
 
-<Route 
-          path="/gestion-usuarios" 
+        <Route
+          path="/combustible"
+          element={isAuthenticated() ? (
+            <>
+              <NavBar />
+              <Combustible/>
+            </>
+          ) : <Navigate to="/" />}
+        />
+
+        <Route
+          path="/gestion-usuarios"
           element={isAuthenticated() ? (
             <>
               <NavBar />
               <GestionUsuarios />
             </>
-          ) : <Navigate to="/" />} 
+          ) : <Navigate to="/" />}
         />
-        
+
 
         {/* Redirige al login si la ruta no existe */}
         <Route path="*" element={<Login />} />

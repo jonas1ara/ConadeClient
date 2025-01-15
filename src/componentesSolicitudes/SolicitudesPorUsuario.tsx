@@ -33,6 +33,7 @@ const SolicitudesPorUsuario: React.FC = () => {
   const [ordenFecha, setOrdenFecha] = useState<"asc" | "desc" | null>(null);
   const [paginaActual, setPaginaActual] = useState(1);
   const solicitudesPorPagina = 10; // Número de elementos por página
+  const [filtroTipo, setFiltroTipo] = useState<string | null>(null);
   const [filtroAnio, setFiltroAnio] = useState<number | null>(null);
   const [filtroMes, setFiltroMes] = useState<number | null>(null);
   const [accionSeleccionada, setAccionSeleccionada] = useState<string>('');
@@ -154,6 +155,11 @@ const SolicitudesPorUsuario: React.FC = () => {
           ? new Date(a.fechaSolicitud).getTime() - new Date(b.fechaSolicitud).getTime()
           : new Date(b.fechaSolicitud).getTime() - new Date(a.fechaSolicitud).getTime()
       );
+    }
+
+    // Filtro por tipo de solicitud
+    if (filtroTipo) {
+      filtradas = filtradas.filter((solicitud) => solicitud.tipoSolicitud === filtroTipo);
     }
 
     if (filtroAnio) {
@@ -383,6 +389,22 @@ const SolicitudesPorUsuario: React.FC = () => {
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
       <div className="mb-3 d-flex justify-content-between">
+      <div>
+          <label className="form-label">Filtrar por Tipo de Solicitud:</label>
+          <select
+            className="form-select"
+            value={filtroTipo || ""}
+            onChange={(e) => setFiltroTipo(e.target.value || null)}
+          >
+            <option value="">Todos</option>
+            <option value="Servicio Postal">Servicio Postal</option>
+            <option value="Servicio Transporte">Servicio Transporte</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Eventos">Eventos</option>
+            <option value="Abastecimiento de Combustible">Abastecimiento de Combustible</option>
+          </select>
+        </div>
+
         <div>
           <label className="form-label">Filtrar por Estado:</label>
           <select
