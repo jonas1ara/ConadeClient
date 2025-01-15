@@ -17,7 +17,7 @@ interface Solicitud {
     fechaInicio?: string;
     fechaEntrega?: string;
     fechaEnvio?: string;
-    fechaRecepcionMaxima?: string;
+    fechaRecepcion?: string;
     fechaTransporte?: string;
     fechaTransporteVuelta?: string;
     fechaFin?: string;
@@ -151,7 +151,7 @@ const AprobarSolicitud: React.FC = () => {
                     <>
                         {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
                         {solicitud.fechaEnvio && <p><strong>Fecha de Envío:</strong> {formatDateTime(solicitud.fechaEnvio)}</p>}
-                        {solicitud.fechaRecepcionMaxima && <p><strong>Fecha de Recepción Máxima:</strong> {formatDateTime(solicitud.fechaRecepcionMaxima)}</p>}
+                        {solicitud.fechaRecepcion && <p><strong>Fecha de Recepción Máxima:</strong> {formatDateTime(solicitud.fechaRecepcion)}</p>}
                     </>
                 );
             case "Servicio Transporte":

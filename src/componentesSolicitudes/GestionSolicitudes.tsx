@@ -68,10 +68,13 @@ const GestionSolicitudes: React.FC = () => {
             url = "https://localhost:7094/api/ServicioTransporte/ObtenerTodos";
             break;
           case 3:
-            url = "https://localhost:7094/api/UsoInmobiliario/ObtenerTodos";
+            url = "https://localhost:7094/api/Eventos/ObtenerTodos";
             break;
           case 4:
             url = "https://localhost:7094/api/Mantenimiento/ObtenerTodos";
+            break;
+          case 5:
+            url = "https://localhost:7094/api/Combustible/ObtenerTodos";
             break;
           default:
             throw new Error("Área no válida o no definida.");
@@ -239,7 +242,7 @@ const GestionSolicitudes: React.FC = () => {
         console.log("ID de usuario actual:", usuarioId);
 
         const response = await fetch(
-          `https://localhost:7094/api/usuario/EliminarSolicitudAdmin?idSolicitud=${id}&usuarioId=${usuarioId}`,
+          `https://localhost:7094/api/usuario/EliminarSolicitudAdmin?idSolicitud=${id}&usuarioId=${usuarioId}&tipoSolicitud=${solicitudes.find(solicitud => solicitud.id === id)?.tipoSolicitud}`,
           { method: "DELETE" }
         );
 
