@@ -30,6 +30,7 @@ interface Solicitud {
 interface Area {
   idArea: number;
   nombreArea: string;
+  id: number;
 }
 
 interface Usuario {
@@ -45,6 +46,7 @@ const GestionSolicitudes: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
   const [filtroUsuario, setFiltroUsuario] = useState<number | null>(null); // Filtro de usuario
+  const [filtroTipo, setFiltroTipo] = useState<string | null>(null);
   const [filtroAnio, setFiltroAnio] = useState<number | null>(null);
   const [filtroMes, setFiltroMes] = useState<number | null>(null);
   const [ordenFecha, setOrdenFecha] = useState<"asc" | "desc" | null>(null);
@@ -57,46 +59,99 @@ const GestionSolicitudes: React.FC = () => {
   useEffect(() => {
     const obtenerSolicitudes = async () => {
       try {
-        const areaId = parseInt(localStorage.getItem("areaId") || "0");
+        // Obtener el usuario actual desde el localStorage (o cualquier otro estado global)
+        const usuarioId = parseInt(localStorage.getItem("idUsuario") || "0");
+        const usuarioRol = localStorage.getItem("rol"); // Asumimos que el rol está en el localStorage
+        console.log("UsuarioId:", usuarioId); // Log para verificar el usuarioId
+        console.log("Rol de usuario:", usuarioRol); // Log para verificar el rol de usuario
 
-        let url = "";
-        switch (areaId) {
-          case 1:
-            url = "https://localhost:7094/api/ServicioPostal/ObtenerTodos";
-            break;
-          case 2:
-            url = "https://localhost:7094/api/ServicioTransporte/ObtenerTodos";
-            break;
-          case 3:
-            url = "https://localhost:7094/api/Eventos/ObtenerTodos";
-            break;
-          case 4:
-            url = "https://localhost:7094/api/Mantenimiento/ObtenerTodos";
-            break;
-          case 5:
-            url = "https://localhost:7094/api/Combustible/ObtenerTodos";
-            break;
-          default:
-            throw new Error("Área no válida o no definida.");
+        if (usuarioRol !== "Admin") {
+          throw new Error("El usuario no tiene permisos de administrador.");
         }
 
-        const response = await fetch(url);
-        if (!response.ok) {
-          throw new Error("Error al obtener las solicitudes.");
+        // Obtener las áreas asignadas al usuario administrador
+        const responseAreas = await fetch(`https://localhost:7094/api/Usuario/AreasPorUsuario?usuarioId=${usuarioId}`);
+        if (!responseAreas.ok) {
+          throw new Error("Error al obtener las áreas del usuario.");
         }
 
-        const data = await response.json();
-        setSolicitudes(Array.isArray(data) ? data : []);
+        const dataAreas = await responseAreas.json();
+        console.log("Áreas obtenidas:", dataAreas); // Log para verificar la estructura
+
+        // Asegurarnos de que dataAreas es un array antes de usar map
+        if (Array.isArray(dataAreas.obj)) {
+          setAreas(dataAreas.obj);
+        } else {
+          throw new Error("La respuesta de áreas no es un array.");
+        }
+
+        // Obtener los ids de las áreas administradas por el usuario
+        const areaIds = dataAreas.obj.map((area: Area) => area.id);
+        console.log("Áreas administradas por el usuario AAAAAAAAAA:", areaIds); // Log para verificar las áreas
+
+        dataAreas.obj.forEach((area: any, index: number) => {
+          console.log(`Área ${index}:`, area); // Verifica los datos en cada elemento
+        });
+
+        // Inicializar un array para almacenar las solicitudes de todas las áreas
+        let todasLasSolicitudes: Solicitud[] = [];
+
+        // Hacer peticiones para cada área administrada
+        for (const areaId of areaIds) {
+          let url = "";
+          switch (areaId) {
+            case 1: // Servicio Postal
+              url = "https://localhost:7094/api/ServicioPostal/ObtenerTodos";
+              break;
+            case 2: // Servicio Transporte
+              url = "https://localhost:7094/api/ServicioTransporte/ObtenerTodos";
+              break;
+            case 3: // Eventos
+              url = "https://localhost:7094/api/Evento/ObtenerTodos";
+              break;
+            case 4: // Mantenimiento
+              url = "https://localhost:7094/api/Mantenimiento/ObtenerTodos";
+              break;
+            case 5: // Combustible
+              url = "https://localhost:7094/api/Combustible/ObtenerTodos";
+              break;
+            default:
+              continue; // Si el área no es válida, saltamos al siguiente
+          }
+
+          // Realizar la solicitud a la API para cada área
+          const responseSolicitudes = await fetch(url);
+          if (!responseSolicitudes.ok) {
+            throw new Error(`Error al obtener las solicitudes de la área ${areaId}.`);
+          }
+
+          const dataSolicitudes = await responseSolicitudes.json();
+          console.log(`Solicitudes obtenidas para el área ${areaId}:`, dataSolicitudes); // Log para verificar las solicitudes
+
+          if (Array.isArray(dataSolicitudes)) {
+            // Unir las solicitudes obtenidas en todasLasSolicitudes
+            todasLasSolicitudes = [...todasLasSolicitudes, ...dataSolicitudes];
+          }
+        }
+
+        // Verificar si hay solicitudes y establecer el estado
+        if (todasLasSolicitudes.length > 0) {
+          setSolicitudes(todasLasSolicitudes);
+          console.log("Solicitudes cargadas:", todasLasSolicitudes); // Verificar que las solicitudes se hayan cargado correctamente
+        } else {
+          console.log("No se encontraron solicitudes.");
+          setSolicitudes([]); // Asegurarse de que el estado sea vacío si no hay solicitudes
+        }
+
       } catch (error: any) {
         console.error("Error al cargar las solicitudes:", error);
         setError(error.message || "Hubo un problema al cargar las solicitudes.");
       }
     };
 
-
-
     obtenerSolicitudes();
   }, []);
+
 
   useEffect(() => {
     const obtenerAreas = async () => {
@@ -167,6 +222,11 @@ const GestionSolicitudes: React.FC = () => {
 
     if (filtroEstado) {
       filtradas = filtradas.filter((solicitud) => solicitud.estado === filtroEstado);
+    }
+
+    // Filtro por tipo de solicitud
+    if (filtroTipo) {
+      filtradas = filtradas.filter((solicitud) => solicitud.tipoSolicitud === filtroTipo);
     }
 
     if (filtroUsuario) {
@@ -462,7 +522,26 @@ const GestionSolicitudes: React.FC = () => {
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
+      
+
       <div className="mb-3 d-flex justify-content-between">
+
+        <div>
+          <label className="form-label">Filtrar por Tipo de Solicitud:</label>
+          <select
+            className="form-select"
+            value={filtroTipo || ""}
+            onChange={(e) => setFiltroTipo(e.target.value || null)}
+          >
+            <option value="">Todos</option>
+            <option value="Servicio Postal">Servicio Postal</option>
+            <option value="Servicio Transporte">Servicio Transporte</option>
+            <option value="Mantenimiento">Mantenimiento</option>
+            <option value="Eventos">Eventos</option>
+            <option value="Abastecimiento de Combustible">Abastecimiento de Combustible</option>
+          </select>
+        </div>
+
         <div>
           <label className="form-label">Filtrar por Estado:</label>
           <select
