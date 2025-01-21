@@ -8,27 +8,24 @@ const SolicitudEventos: React.FC = () => {
   const [fechaSolicitud, setFechaSolicitud] = useState<string>(new Date().toISOString().split("T")[0]);
   const [areaSolicitante, setAreaSolicitante] = useState<string>("");
   const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
-  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Uso Inmobiliario"); 
+  const [tipoServicio, setTipoServicio] = useState<string>(""); // Nuevo campo para tipo de servicio
+  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Eventos"); // Nuevo campo para tipo de servicio
   const [sala, setSala] = useState<string>("");
   const [fechaInicio, setFechaInicio] = useState<string>("");
   const [fechaFin, setFechaFin] = useState<string>("");
   const [horarioInicio, setHorarioInicio] = useState<string>("");
   const [horarioFin, setHorarioFin] = useState<string>("");
   const [estado, setEstado] = useState<string>("Solicitada");
-  const [observaciones, setObservaciones] = useState<string>("");
   const [descripcion, setDescripcion] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
 
-  setFechaSolicitud;
-  console.log(descripcion);
-
   // Recuperar usuario desde localStorage
   useEffect(() => {
     const usuarioIdGuardado = localStorage.getItem("idUsuario");
     if (usuarioIdGuardado) {
-      setUsuarioSolicitanteID(Number(usuarioIdGuardado)); // Guardar el usuarioId como número
+      setUsuarioSolicitanteID(Number(usuarioIdGuardado));
     } else {
       setError("Usuario no encontrado. Por favor, inicie sesión.");
       console.error("usuarioId no encontrado en localStorage");
@@ -37,7 +34,7 @@ const SolicitudEventos: React.FC = () => {
 
   // Generar número de solicitud (simulación)
   useEffect(() => {
-    const numeroSerie = Math.floor(Math.random() * 10000); // Número aleatorio para la solicitud
+    const numeroSerie = Math.floor(Math.random() * 10000);
     setNumeroDeSolicitud(numeroSerie.toString());
   }, []);
 
@@ -66,11 +63,26 @@ const SolicitudEventos: React.FC = () => {
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     switch (name) {
+      case "numeroDeSolicitud":
+        setNumeroDeSolicitud(value);
+        break;
+      case "fechaSolicitud":
+        setFechaSolicitud(value);
+        break;
+      case "usuarioSolicitanteID":
+        setUsuarioSolicitanteID(Number(value));
+        break;
+      case "tipoSolicitud":
+        setTipoSolicitud(value);
+        break;
       case "areaSolicitante":
         setAreaSolicitante(value);
         break;
-      case "tipoSolitud":
-        setTipoSolicitud(value);
+      case "tipoServicio":
+        setTipoServicio(value);
+        if (value !== "Uso de auditorio") {
+          setSala("");
+        }
         break;
       case "sala":
         setSala(value);
@@ -93,9 +105,6 @@ const SolicitudEventos: React.FC = () => {
       case "estado":
         setEstado(value);
         break;
-      case "observaciones":
-        setObservaciones(value);
-        break;
       default:
         break;
     }
@@ -106,20 +115,18 @@ const SolicitudEventos: React.FC = () => {
     setError("");
     setSuccessMessage("");
 
-    // Validar si usuarioSolicitanteID está presente
     if (!usuarioSolicitanteID) {
       setError("El ID del usuario solicitante es obligatorio.");
       return;
     }
 
-    // Validación de campos obligatorios
-    if (!areaSolicitante || !fechaInicio || !fechaFin || !horarioInicio || !horarioFin) {
-      setError("El área solicitante, la fecha de uso y hora de inicio y fin son obligatorias.");
+    if (!areaSolicitante || !fechaInicio || !fechaFin || !horarioInicio || !horarioFin || !tipoServicio) {
+      setError("Todos los campos obligatorios deben ser completados.");
       return;
     }
 
     try {
-      const url = `https://localhost:7094/api/Evento/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&sala=${encodeURIComponent(sala)}&catalogoId=${encodeURIComponent("1")}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}&horarioInicio=${encodeURIComponent(horarioInicio)}&horarioFin=${encodeURIComponent(horarioFin)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
+      const url = `https://localhost:7094/api/Evento/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoServicio=${encodeURIComponent(tipoServicio)}&sala=${encodeURIComponent(sala)}&catalogoId=${encodeURIComponent("1")}&descripcionServicio=${encodeURIComponent(descripcion)}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}&horarioInicio=${encodeURIComponent(horarioInicio)}&horarioFin=${encodeURIComponent(horarioFin)}&estado=${encodeURIComponent(estado)}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -130,32 +137,27 @@ const SolicitudEventos: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error al crear la solicitud:", errorData);
-
-        // Mostrar los mensajes de error específicos
-        if (errorData.mensaje) {
-          setError(errorData.mensaje);
-        } else {
-          setError("Hubo un error al crear la solicitud.");
-        }
+        setError(errorData.mensaje || "Error al crear la solicitud.");
         return;
       }
 
       setSuccessMessage("Solicitud enviada exitosamente.");
       setNumeroDeSolicitud("");
+      setFechaSolicitud("");
+      setUsuarioSolicitanteID(null);
+      setTipoSolicitud("");
+      setTipoServicio("");
+      setSala("");
       setAreaSolicitante("");
       setFechaInicio("");
       setFechaFin("");
       setHorarioInicio("");
       setHorarioFin("");
       setDescripcion("");
-      setObservaciones("");
 
-      // Esperar 2 segundos y luego navegar a la página principal
       setTimeout(() => {
         navigate("/panel-principal");
-      }, 2000); // 2000 milisegundos (2 segundos)
-
+      }, 2000);
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
     }
@@ -167,7 +169,7 @@ const SolicitudEventos: React.FC = () => {
 
   return (
     <div className="container mt-4">
-      <h2 className="text-center mb-4">Solicitud de Uso Inmobiliario</h2>
+      <h2 className="text-center mb-4">Solicitud de Eventos</h2>
 
       {error && <div className="alert alert-danger text-center">{error}</div>}
       {successMessage && <div className="alert alert-success text-center">{successMessage}</div>}
@@ -233,25 +235,49 @@ const SolicitudEventos: React.FC = () => {
             className="form-control"
             id="tipoSolicitud"
             name="tipoSolicitud"
-            value="Uso Inmobiliario"
+            value="Eventos"
             disabled
             readOnly
           />
         </div>
 
         <div className="mb-3">
-          <label htmlFor="sala" className="form-label">
-            Sala
+          <label htmlFor="tipoServicio" className="form-label">
+            Tipo de Servicio
           </label>
-          <input
-            type="text"
+          <select
             className="form-control"
-            id="sala"
-            name="sala"
-            value={sala}
+            id="tipoServicio"
+            name="tipoServicio"
+            value={tipoServicio}
             onChange={manejarCambio}
-          />
+            required
+          >
+            <option value="">Seleccione un tipo de servicio</option>
+            <option value="Audio">Audio</option>
+            <option value="Grabaciones">Grabaciones</option>
+            <option value="Uso de auditorio">Uso de auditorio</option>
+          </select>
         </div>
+
+        {tipoServicio === "Uso de auditorio" && (
+          <div className="mb-3">
+            <label htmlFor="sala" className="form-label">
+              Sala
+            </label>
+            <select
+              className="form-control"
+              id="sala"
+              name="sala"
+              value={sala}
+              onChange={manejarCambio}
+              required
+            >
+              <option value="">Seleccione una sala</option>
+              <option value="Auditorio de medicina">Auditorio de medicina</option>
+            </select>
+          </div>
+        )}
 
         <div className="mb-3">
           <label htmlFor="fechaInicio" className="form-label">
@@ -296,10 +322,6 @@ const SolicitudEventos: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la hora en formato <strong>HH:MM</strong> (por ejemplo, 09:30).
-          </small>
-
         </div>
 
         <div className="mb-3">
@@ -315,9 +337,6 @@ const SolicitudEventos: React.FC = () => {
             onChange={manejarCambio}
             required
           />
-          <small className="form-text text-muted">
-            Por favor, ingrese la hora en formato <strong>HH:MM</strong> (por ejemplo, 17:45).
-          </small>
         </div>
 
         <div className="mb-3">
@@ -342,9 +361,10 @@ const SolicitudEventos: React.FC = () => {
             Regresar
           </button>
         </div>
-      </form>
-    </div>
+      </form >
+    </div >
   );
 };
 
 export default SolicitudEventos;
+

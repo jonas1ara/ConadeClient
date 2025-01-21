@@ -9,6 +9,10 @@ const EditarUsuario: React.FC = () => {
     const [areas, setAreas] = useState<{ id: number, nombre: string }[]>([]);
     const [areasUsuario, setAreasUsuario] = useState<{ id: number; nombre: string }[]>([]);
     const navigate = useNavigate();
+    // Datos del usuario en sesión
+    const usuarioSesionRol = localStorage.getItem("rol"); // Rol del usuario en sesión
+    const usuarioSesionId = localStorage.getItem("idUsuario"); // ID del usuario en sesión
+
     const { id } = useParams<{ id: string }>();
 
     useEffect(() => {
@@ -243,6 +247,7 @@ const EditarUsuario: React.FC = () => {
                     value={usuario.rol}
                     onChange={manejarCambio}
                     required
+                    disabled={usuarioSesionRol === "Admin" && usuarioSesionId === id}
                 >
                     <option value="Admin">Admin</option>
                     <option value="Usuario">Usuario</option>

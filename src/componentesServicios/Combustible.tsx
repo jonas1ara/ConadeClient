@@ -10,10 +10,10 @@ const SolicitudCombustible: React.FC = () => {
   const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
   const [tipoSolicitud, setTipoSolicitud] = useState<string>("Abastecimiento de Combustible");
   const [tipoCombustible, setTipoCombustible] = useState<string>("");
-  const [cantidadSolicitada, setCantidadSolicitada] = useState<number>(0);
+  const [litros, setLitros] = useState<number>(0);
   const [descripcion, setDescripcion] = useState<string>("");
   const [estado, setEstado] = useState<string>("Solicitada");
-  const [observaciones, setObservaciones] = useState<string>("");
+  const [fecha, setFecha] = useState<string>(new Date().toISOString().split("T")[0]);
 
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -70,17 +70,17 @@ const SolicitudCombustible: React.FC = () => {
       case "tipoCombustible":
         setTipoCombustible(value);
         break;
-      case "cantidadSolicitada":
-        setCantidadSolicitada(Number(value));
+      case "litros":
+        setLitros(Number(value));
         break;
       case "descripcion":
         setDescripcion(value);
         break;
+      case "fecha":
+        setFecha(value);
+        break;
       case "estado":
         setEstado(value);
-        break;
-      case "observaciones":
-        setObservaciones(value);
         break;
       default:
         break;
@@ -97,13 +97,13 @@ const SolicitudCombustible: React.FC = () => {
       return;
     }
 
-    if (!areaSolicitante || cantidadSolicitada <= 0) {
+    if (!areaSolicitante || litros <= 0) {
       setError("El área solicitante y la cantidad solicitada son obligatorias.");
       return;
     }
 
     try {
-      const url = `https://localhost:7094/api/Combustible/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSerie)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&catalogoId=${encodeURIComponent("1")}&descripcionServicio=${encodeURIComponent(descripcion)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
+      const url = `https://localhost:7094/api/Combustible/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSerie)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoCombustible=${encodeURIComponent(tipoCombustible)}&litros=${encodeURIComponent(litros)}&catalogoId=${encodeURIComponent("1")}&descripcionServicio=${encodeURIComponent(descripcion)}&fecha=${encodeURIComponent(fecha)}&estado=${encodeURIComponent(estado)}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -131,7 +131,7 @@ const SolicitudCombustible: React.FC = () => {
       setAreaSolicitante("");
       setTipoSolicitud("");
       setTipoCombustible("");
-      setCantidadSolicitada(0);
+      setLitros(0);
       setDescripcion("");
       setEstado("Solicitada");
 
@@ -237,23 +237,38 @@ const SolicitudCombustible: React.FC = () => {
           >
             <option value="">Seleccione un tipo de combustible</option>
             <option value="Gasolina">Gasolina</option>
-            <option value="Diésel">Diésel</option>
+            <option value="Diesel">Diésel</option>
           </select>
         </div>
 
         <div className="mb-3">
-          <label htmlFor="cantidadSolicitada" className="form-label">
+          <label htmlFor="litros" className="form-label">
             Cantidad Solicitada (Litros)
           </label>
           <input
             type="number"
             className="form-control"
-            id="cantidadSolicitada"
-            name="cantidadSolicitada"
-            value={cantidadSolicitada}
+            id="litros"
+            name="litros"
+            value={litros}
             onChange={manejarCambio}
             required
             min="1"
+          />
+        </div>
+
+        <div className="mb-3">
+          <label htmlFor="fecha" className="form-label">
+            Fecha de Abastecimiento
+          </label>
+          <input
+            type="date"
+            className="form-control"
+            id="fecha"
+            name="fecha"
+            value={fecha}
+            onChange={manejarCambio}
+            required
           />
         </div>
 
