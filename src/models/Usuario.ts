@@ -7,7 +7,7 @@ export class Usuario {
     nombreUsuario: string = ""; 
     contrasena: string = "";
     rol: string = ""; // Asignar valor por defecto
-    areaID: number = 0;
+    areaID: number[] = []; // Asignar valor por defecto
     fechaCreacion?: Date;
     fechaUltimoAcceso?: Date;
     idEmpleado?: number;

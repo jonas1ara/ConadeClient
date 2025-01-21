@@ -16,6 +16,7 @@ import RechazarSolicitud from "./componentesSolicitudes/RechazarSolicitud";
 import DetallesSolicitud from './componentesSolicitudes/DetallesSolicitud';
 import GestionUsuarios from './componentesUsuarios/GestionUsuarios';
 import PanelPrincipalAdministradores from './componentesUsuarios/PanelPrincipalAdministradores';
+import EditarUsuario from './componentesUsuarios/EditarUsuario';
 
 function App() {
   UseTheme(); // Aplicar el tema automáticamente
@@ -33,6 +34,9 @@ function App() {
 
         {/* Ruta para Registro de Usuario */}
         <Route path="/registro" element={<RegistroUsuario />} />
+
+        {/*Ruta para Editar Usuario */}
+        <Route path="/editar-usuario/:id" element={<EditarUsuario />} />
 
         {/* Rutas protegidas (requieren que el usuario esté autenticado) */}
         <Route

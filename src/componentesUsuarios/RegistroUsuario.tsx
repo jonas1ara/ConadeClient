@@ -6,34 +6,49 @@ const RegistroUsuario: React.FC = () => {
   const [usuario, setUsuario] = useState<Usuario>(new Usuario());
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const [areas, setAreas] = useState<{ id: number, nombre: string }[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Aseguramos que el areaID siempre tenga un valor numérico
-    if (usuario.areaID === undefined) {
-      setUsuario((prevState) => ({
-        ...prevState,
-        areaID: 1, // Establecemos un valor inicial por defecto (ejemplo: 1)
-      }));
-    }
+    const fetchAreas = async () => {
+      try {
+        const response = await fetch("https://localhost:7094/api/Area/Listar");
+        const data = await response.json();
+        if (data.success) {
+          setAreas(data.areas);
+        }
+      } catch (error) {
+        console.error("Error al obtener las áreas", error);
+        setError("Error al obtener las áreas");
+      }
+    };
+
+    fetchAreas();
   }, [usuario.areaID]);
 
-  const manejarCambio = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
+  const manejarCambio = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      const checked = (e.target as HTMLInputElement).checked;
+      const area = parseInt(value, 10);
 
-    // Convertir los campos 'nombre', 'apellidoPaterno', 'apellidoMaterno' a mayúsculas
-    const nuevoValor =
-      name === "nombre" || name === "apellidoPaterno" || name === "apellidoMaterno"
-        ? value.toUpperCase()
-        : value;
+      setUsuario((prevState) => ({
+        ...prevState,
+        areaID: checked
+          ? [...prevState.areaID, area]
+          : prevState.areaID.filter((id) => id !== area),
+      }));
+    } else {
+      const nuevoValor =
+        name === "nombre" || name === "apellidoPaterno" || name === "apellidoMaterno"
+          ? value.toUpperCase()
+          : value;
 
-    // Aseguramos que el campo areaID se maneje como número y no como string
-    setUsuario({
-      ...usuario,
-      [name]: name === "areaID" ? parseInt(nuevoValor, 10) : nuevoValor,
-    });
+      setUsuario({
+        ...usuario,
+        [name]: name === "areaID" ? parseInt(nuevoValor, 10) : nuevoValor,
+      });
+    }
   };
 
   const capitalizeRole = (role: string) => {
@@ -48,40 +63,42 @@ const RegistroUsuario: React.FC = () => {
     try {
       const rolCapitalizado = capitalizeRole(usuario.rol);
 
-      const url = `https://localhost:7094/api/Usuario/Crear?nombre=${encodeURIComponent(
-        usuario.nombre
-      )}&apellidoPaterno=${encodeURIComponent(
-        usuario.apellidoPaterno
-      )}&apellidoMaterno=${encodeURIComponent(
-        usuario.apellidoMaterno
-      )}&claveEmpleado=${encodeURIComponent(
-        usuario.claveEmpleado
-      )}&nombreUsuario=${encodeURIComponent(
-        usuario.nombreUsuario
-      )}&contrasena=${encodeURIComponent(
-        usuario.contrasena
-      )}&rol=${encodeURIComponent(rolCapitalizado)}${rolCapitalizado === "Admin" ? `&areaID=${usuario.areaID}` : ""
-        }`;
+      const requestData = {
+        nombre: usuario.nombre,
+        apellidoPaterno: usuario.apellidoPaterno,
+        apellidoMaterno: usuario.apellidoMaterno,
+        claveEmpleado: usuario.claveEmpleado,
+        nombreUsuario: usuario.nombreUsuario,
+        contrasena: usuario.contrasena,
+        rol: rolCapitalizado,
+        areasId: usuario.areaID, // Enviar como arreglo de enteros
+      };
 
-      const response = await fetch(url, {
+      const response = await fetch("https://localhost:7094/api/Usuario/Crear", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Enviar como JSON
+        },
+        body: JSON.stringify(requestData), // Convertir el objeto a JSON
+
       });
+
+      console.log("Datos enviados al servidor:", requestData);
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.mensaje); // Enviamos el mensaje de error recibido
-
+        throw new Error(data.mensaje || "Error en la solicitud");
       }
 
       setSuccessMessage("Usuario creado exitosamente");
-      setTimeout(() => navigate("/"), 2000);
+      setTimeout(() => navigate("/gestion-usuarios"), 2000);
     } catch (error: any) {
       setError(error.message || "Error al registrar el usuario");
     }
   };
 
   const manejarCancelar = () => {
-    navigate("/");
+    navigate("/gestion-usuarios");
   };
 
   return (
@@ -96,9 +113,7 @@ const RegistroUsuario: React.FC = () => {
         )}
         <form onSubmit={manejarRegistro}>
           <div className="mb-3">
-            <label htmlFor="nombre" className="form-label">
-              Nombre
-            </label>
+            <label htmlFor="nombre" className="form-label">Nombre</label>
             <input
               type="text"
               id="nombre"
@@ -110,9 +125,7 @@ const RegistroUsuario: React.FC = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="apellidoPaterno" className="form-label">
-              Apellido Paterno
-            </label>
+            <label htmlFor="apellidoPaterno" className="form-label">Apellido Paterno</label>
             <input
               type="text"
               id="apellidoPaterno"
@@ -124,9 +137,7 @@ const RegistroUsuario: React.FC = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="apellidoMaterno" className="form-label">
-              Apellido Materno
-            </label>
+            <label htmlFor="apellidoMaterno" className="form-label">Apellido Materno</label>
             <input
               type="text"
               id="apellidoMaterno"
@@ -138,9 +149,7 @@ const RegistroUsuario: React.FC = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="claveEmpleado" className="form-label">
-              Clave de Empleado
-            </label>
+            <label htmlFor="claveEmpleado" className="form-label">Clave de Empleado</label>
             <input
               type="text"
               id="claveEmpleado"
@@ -152,9 +161,7 @@ const RegistroUsuario: React.FC = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="nombreUsuario" className="form-label">
-              Nombre de Usuario
-            </label>
+            <label htmlFor="nombreUsuario" className="form-label">Nombre de Usuario</label>
             <input
               type="text"
               id="nombreUsuario"
@@ -166,9 +173,7 @@ const RegistroUsuario: React.FC = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="contrasena" className="form-label">
-              Contraseña
-            </label>
+            <label htmlFor="contrasena" className="form-label">Contraseña</label>
             <input
               type="password"
               id="contrasena"
@@ -180,9 +185,7 @@ const RegistroUsuario: React.FC = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="rol" className="form-label">
-              Rol
-            </label>
+            <label htmlFor="rol" className="form-label">Rol</label>
             <select
               id="rol"
               name="rol"
@@ -196,38 +199,34 @@ const RegistroUsuario: React.FC = () => {
               <option value="usuario">Usuario</option>
             </select>
           </div>
-          {usuario.rol.toLowerCase() === "admin" && (
+
+          {(usuario.rol.toLowerCase() === "admin" || usuario.rol.toLowerCase() === "usuario") && (
             <div className="mb-3">
-              <label htmlFor="areaID" className="form-label">
-                Área
-              </label>
-              <select
-                id="areaID"
-                name="areaID"
-                className="form-select"
-                value={usuario.areaID}
-                onChange={manejarCambio}
-                required
-              >
-                <option value="">Seleccionar área</option>
-                <option value="1">Servicio postal</option>
-                <option value="2">Servicio de transporte</option>
-                <option value="3">Uso de auditorios</option>
-                <option value="4">Mantenimiento</option>
-              </select>
+              <label className="form-label">Áreas</label>
+              <div className="form-check">
+                {areas.map((area) => (
+                  <div key={area.id} className="form-check">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id={`area-${area.id}`}
+                      name="areaID"
+                      value={area.id}
+                      checked={usuario.areaID.includes(area.id)}
+                      onChange={manejarCambio}
+                    />
+                    <label className="form-check-label" htmlFor={`area-${area.id}`}>
+                      {area.nombre}
+                    </label>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+
           <div className="d-flex justify-content-between">
-            <button type="submit" className="btn btn-primary">
-              Registrar
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={manejarCancelar}
-            >
-              Cancelar
-            </button>
+            <button type="submit" className="btn btn-primary">Registrar</button>
+            <button type="button" className="btn btn-secondary" onClick={manejarCancelar}>Cancelar</button>
           </div>
         </form>
       </div>
