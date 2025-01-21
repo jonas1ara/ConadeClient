@@ -11,6 +11,7 @@ interface Usuario {
   nombre: string;
   apellidoPaterno: string;
   apellidoMaterno: string;
+  claveEmpleado: string;
   nombreUsuario: string;
   contrasena: string;
   rol: string;
@@ -181,6 +182,7 @@ const Usuarios: React.FC = () => {
             <th>Nombre</th>
             <th>Apellido Paterno</th>
             <th>Apellido Materno</th>
+            <th>Clave de Empleado</th>
             <th>Nombre de Usuario</th>
             <th>Contraseña</th>
             <th>Rol</th>
@@ -197,6 +199,7 @@ const Usuarios: React.FC = () => {
                 <td>{usuario.nombre}</td>
                 <td>{usuario.apellidoPaterno}</td>
                 <td>{usuario.apellidoMaterno}</td>
+                <td>{usuario.claveEmpleado}</td>
                 <td>{usuario.nombreUsuario}</td>
                 <td>{usuario.contrasena}</td>
                 <td>{usuario.rol}</td>

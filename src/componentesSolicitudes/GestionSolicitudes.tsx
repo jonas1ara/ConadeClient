@@ -273,8 +273,17 @@ const GestionSolicitudes: React.FC = () => {
     setPaginaActual(numero);
   };
 
-  const aceptarSolicitud = (id: number) => navigate(`/aprobar-solicitud/${id}`);
-  const rechazarSolicitud = (id: number) => navigate(`/rechazar-solicitud/${id}`);
+  const aceptarSolicitud = (solicitud: Solicitud) => {
+    navigate(`/aprobar-solicitud/${solicitud.id}`, {
+      state: { solicitud } // Pasar el id y el tipo de solicitud como estado
+    });
+  };
+  
+  const rechazarSolicitud = (solicitud: Solicitud) => {
+    navigate(`/rechazar-solicitud/${solicitud.id}`, {
+      state: { solicitud } // Pasar el id y el tipo de solicitud como estado
+    });
+  };
 
   const detallesSolicitud = (solicitud: Solicitud) => {
     navigate(`/detalles-solicitud/${solicitud.id}`, {
@@ -666,14 +675,14 @@ const GestionSolicitudes: React.FC = () => {
                 <td className="d-flex justify-content-between">
                   <button
                     className="btn btn-success me-2"
-                    onClick={() => aceptarSolicitud(solicitud.id)}
+                    onClick={() => aceptarSolicitud(solicitud)}
                     disabled={solicitud.estado !== 'Solicitada'}
                   >
                     Aceptar
                   </button>
                   <button
                     className="btn btn-warning me-2"
-                    onClick={() => rechazarSolicitud(solicitud.id)}
+                    onClick={() => rechazarSolicitud(solicitud)}
                     disabled={solicitud.estado !== 'Solicitada'}
                   >
                     Rechazar

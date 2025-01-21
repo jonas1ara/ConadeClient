@@ -1,32 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 
-interface Solicitud {
-    id: number;
-    numeroDeSerie: string;
-    fechaSolicitud: string;
-    tipoSolicitud: string;
-    estado: string;
-    observaciones: string | null;
-    areaSolicitante: number;
-    descripcionServicio: string | null;
-    usuarioSolicitante: number;
-    areaId: number;
-    tipoServicio?: string;
-    tipoDeServicio?: string;
-    fechaInicio?: string;
-    fechaEntrega?: string;
-    fechaEnvio?: string;
-    fechaRecepcionMaxima?: string;
-    fechaTransporte?: string;
-    fechaTransporteVuelta?: string;
-    fechaFin?: string;
-    origen?: string;
-    destino?: string;
-    sala?: string;
-    horarioInicio?: string;
-    horarioFin?: string;
-}
+// interface Solicitud {
+//     id: number;
+//     numeroDeSerie: string;
+//     fechaSolicitud: string;
+//     tipoSolicitud: string;
+//     estado: string;
+//     observaciones: string | null;
+//     areaSolicitante: number;
+//     descripcionServicio: string | null;
+//     usuarioSolicitante: number;
+//     areaId: number;
+//     tipoServicio?: string;
+//     tipoDeServicio?: string;
+//     fechaInicio?: string;
+//     fechaEntrega?: string;
+//     fechaEnvio?: string;
+//     fechaRecepcionMaxima?: string;
+//     fechaTransporte?: string;
+//     fechaTransporteVuelta?: string;
+//     fechaFin?: string;
+//     origen?: string;
+//     destino?: string;
+//     sala?: string;
+//     horarioInicio?: string;
+//     horarioFin?: string;
+// }
 
 interface Area {
     idArea: number;
@@ -41,7 +41,10 @@ interface Usuario {
 const RechazarSolicitud: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
+
+    const { state } = useLocation(); // Obtén el estado de la navegación
+    const solicitud = state?.solicitud; // Recupera la solicitud desde el estado
+
     const [areas, setAreas] = useState<Area[]>([]);
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
     const [observaciones, setObservaciones] = useState<string>("");
@@ -52,33 +55,44 @@ const RechazarSolicitud: React.FC = () => {
     useEffect(() => {
         const obtenerSolicitud = async () => {
             try {
-                const areaId = parseInt(localStorage.getItem("areaId") || "0");
-
+    
                 let url = "";
-                switch (areaId) {
-                    case 1:
-                        url = `https://localhost:7094/api/ServicioPostal/ObtenerPorId/${id}`;
-                        break;
-                    case 2:
-                        url = `https://localhost:7094/api/ServicioTransporte/ObtenerPorId/${id}`;
-                        break;
-                    case 3:
-                        url = `https://localhost:7094/api/UsoInmobiliario/ObtenerPorId/${id}`;
-                        break;
-                    case 4:
-                        url = `https://localhost:7094/api/Mantenimiento/Obtener/${id}`;
-                        break;
-                    default:
-                        throw new Error("Área no válida o no definida.");
-                }
 
+                console.log("ID de la solicitud:", id);
+                console.log("Tipo de solicitud:", solicitud?.tipoSolicitud);
+    
+                // Comprobar el tipo de solicitud y construir la URL correspondiente
+                if (solicitud?.tipoSolicitud) {
+                    switch (solicitud.tipoSolicitud) {
+                        case "Mantenimiento":
+                            url = `https://localhost:7094/api/Mantenimiento/Obtener/${id}`;
+                            break;
+                        case "Servicio Postal":
+                            url = `https://localhost:7094/api/ServicioPostal/ObtenerPorId/${id}`;
+                            break;
+                        case "Servicio Transporte":
+                            url = `https://localhost:7094/api/ServicioTransporte/ObtenerPorId/${id}`;
+                            break;
+                        case "Evento":
+                            url = `https://localhost:7094/api/Evento/ObtenerPorId/${id}`;
+                            break;
+                        case "Combustible":
+                            url = `https://localhost:7094/api/Combustible/ObtenerPorId/${id}`;
+                            break;
+                        default:
+                            throw new Error("Tipo de solicitud no válida.");
+                    }
+                } else {
+                    throw new Error("Tipo de solicitud no definido.");
+                }
+    
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error("Error al obtener la solicitud.");
                 }
-
-                const data = await response.json();
-                setSolicitud(data);
+    
+                // const data = await response.json();
+                // setSolicitud(data);
             } catch (error: any) {
                 console.error("Error al cargar la solicitud:", error);
                 setError(error.message || "Hubo un problema al cargar la solicitud.");
@@ -209,7 +223,7 @@ const RechazarSolicitud: React.FC = () => {
             console.log("Usuario ID:", usuarioId);
             console.log("Observaciones:", observaciones);
 
-            const url = `https://localhost:7094/api/Usuario/AprobarRechazarSolicitud?idSolicitud=${solicitud.id}&usuarioId=${usuarioId}&accion=Rechazar&observaciones=${encodeURIComponent(observaciones)}`;
+            const url = `https://localhost:7094/api/Usuario/AprobarRechazarSolicitud?idSolicitud=${solicitud.id}&usuarioId=${usuarioId}&accion=Rechazar&observaciones=${encodeURIComponent(observaciones)}&tipoSolicitud=${solicitud.tipoSolicitud}`;
 
             console.log("URL de la solicitud:", url); // Verificar la URL que se está construyendo
 
@@ -266,7 +280,7 @@ const RechazarSolicitud: React.FC = () => {
                     <p><strong>Descripción de Servicio:</strong> {solicitud.descripcionServicio}</p>
                 </div>
             </div>
-            
+
             <div className="mb-3">
                 <label className="form-label">Observaciones:</label>
                 <textarea
