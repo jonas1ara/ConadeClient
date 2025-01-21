@@ -17,7 +17,7 @@ interface Solicitud {
     fechaInicio?: string;
     fechaEntrega?: string;
     fechaEnvio?: string;
-    fechaRecepcionMaxima?: string;
+    fechaRecepcion?: string;
     fechaTransporte?: string;
     fechaTransporteVuelta?: string;
     fechaFin?: string;
@@ -26,6 +26,9 @@ interface Solicitud {
     sala?: string;
     horarioInicio?: string;
     horarioFin?: string;
+    tipoCombustible?: string;
+    litros?: number;
+    fecha?: string;
 }
 
 interface Area {
@@ -112,7 +115,7 @@ const DetallesSolicitud: React.FC = () => {
                     <>
                         {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
                         {solicitud.fechaEnvio && <p><strong>Fecha de Envío:</strong> {formatDateTime(solicitud.fechaEnvio)}</p>}
-                        {solicitud.fechaRecepcionMaxima && <p><strong>Fecha de Recepción Máxima:</strong> {formatDateTime(solicitud.fechaRecepcionMaxima)}</p>}
+                        {solicitud.fechaRecepcion && <p><strong>Fecha de Recepción:</strong> {formatDateTime(solicitud.fechaRecepcion)}</p>}
                     </>
                 );
             case "Servicio Transporte":
@@ -120,13 +123,15 @@ const DetallesSolicitud: React.FC = () => {
                     <>
                         {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
                         {solicitud.fechaTransporte && <p><strong>Fecha de Transporte:</strong> {formatDateTime(solicitud.fechaTransporte)}</p>}
+                        {solicitud.fechaTransporteVuelta && <p><strong>Fecha de Recepción:</strong> {formatDateTime(solicitud.fechaTransporteVuelta)}</p>}
                         {solicitud.origen && <p><strong>Origen:</strong> {solicitud.origen}</p>}
                         {solicitud.destino && <p><strong>Destino:</strong> {solicitud.destino}</p>}
                     </>
                 );
-            case "Uso Inmobiliario":
+            case "Eventos":
                 return (
                     <>
+                        {solicitud.tipoServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoServicio}</p>}
                         {solicitud.sala && <p><strong>Sala:</strong> {solicitud.sala}</p>}
                         {solicitud.fechaInicio && <p><strong>Fecha de Inicio:</strong> {formatDateTime(solicitud.fechaInicio)}</p>}
                         {solicitud.fechaFin && <p><strong>Fecha de Fin:</strong> {formatDateTime(solicitud.fechaFin)}</p>}
@@ -134,6 +139,15 @@ const DetallesSolicitud: React.FC = () => {
                         {solicitud.horarioFin && <p><strong>Horario de Fin:</strong> {solicitud.horarioFin}</p>}
                     </>
                 );
+            case "Abastecimiento de Combustible":
+                return (
+                    <>
+                        {solicitud.fecha && <p><strong>Fecha de Servicio:</strong> {formatDateTime(solicitud.fecha)}</p>}
+                        {solicitud.tipoCombustible && <p><strong>Tipo de Combustible:</strong> {solicitud.tipoCombustible}</p>}
+                        {solicitud.litros && <p><strong>Cantidad de Litros:</strong> {solicitud.litros}</p>}
+                    </>
+                )
+            
             default:
                 return null;
         }
@@ -147,13 +161,13 @@ const DetallesSolicitud: React.FC = () => {
                     return `
                         <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
                         <p><strong>Fecha de Envío:</strong> ${solicitud.fechaEnvio ? formatDateTime(solicitud.fechaEnvio) : "No especificada"}</p>
-                        <p><strong>Fecha Recepción Máxima:</strong> ${solicitud.fechaRecepcionMaxima ? formatDateTime(solicitud.fechaRecepcionMaxima) : "No especificada"}</p>
+                        <p><strong>Fecha Recepción:</strong> ${solicitud.fechaRecepcion? formatDateTime(solicitud.fechaRecepcion) : "No especificada"}</p>
                     `;
                 case "Servicio Transporte":
                     return `
                         <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
-                        <p><strong>Fecha Transporte:</strong> ${solicitud.fechaTransporte ? formatDateTime(solicitud.fechaTransporte) : "No especificada"}</p>
-                        <p><strong>Fecha Transporte de Vuelta:</strong> ${solicitud.fechaTransporteVuelta ? formatDateTime(solicitud.fechaTransporteVuelta) : "No especificada"}</p>
+                        <p><strong>Fecha de Transporte:</strong> ${solicitud.fechaTransporte ? formatDateTime(solicitud.fechaTransporte) : "No especificada"}</p>
+                        <p><strong>Fecha de Recepción:</strong> ${solicitud.fechaTransporteVuelta ? formatDateTime(solicitud.fechaTransporteVuelta) : "No especificada"}</p>
                         <p><strong>Origen:</strong> ${solicitud.origen || "No especificado"}</p>
                         <p><strong>Destino:</strong> ${solicitud.destino || "No especificado"}</p>
                     `;
@@ -163,13 +177,20 @@ const DetallesSolicitud: React.FC = () => {
                         <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
                         <p><strong>Fecha de Entrega:</strong> ${solicitud.fechaEntrega ? formatDateTime(solicitud.fechaEntrega) : "No especificada"}</p>
                     `;
-                case "Uso Inmobiliario":
+                case "Eventos":
                     return `
+                        <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoServicio || "No especificado"}</p>
                         <p><strong>Sala:</strong> ${solicitud.sala || "No especificada"}</p>
                         <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
                         <p><strong>Fecha de Fin:</strong> ${solicitud.fechaFin ? formatDateTime(solicitud.fechaFin) : "No especificada"}</p>
                         <p><strong>Horario de Inicio:</strong> ${solicitud.horarioInicio || "No especificado"}</p>
                         <p><strong>Horario de Fin:</strong> ${solicitud.horarioFin || "No especificado"}</p>
+                    `;
+                case "Abastecimiento de Combustible":
+                    return `
+                         <p><strong> Fecha de Servicio:</strong> ${solicitud.fecha ? formatDateTime(solicitud.fecha) : "No especificada"}</p>
+                        <p><strong>Tipo de Combustible:</strong> ${solicitud.tipoCombustible ? (solicitud.tipoCombustible) : "No especificada"}</p>
+                        <p><strong>Cantidad de Litros:</strong> ${solicitud.litros ? (solicitud.litros) : "No especificada"}</p>
                     `;
                 default:
                     return "";

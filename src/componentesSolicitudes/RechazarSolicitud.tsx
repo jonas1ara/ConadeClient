@@ -55,12 +55,12 @@ const RechazarSolicitud: React.FC = () => {
     useEffect(() => {
         const obtenerSolicitud = async () => {
             try {
-    
+
                 let url = "";
 
                 console.log("ID de la solicitud:", id);
                 console.log("Tipo de solicitud:", solicitud?.tipoSolicitud);
-    
+
                 // Comprobar el tipo de solicitud y construir la URL correspondiente
                 if (solicitud?.tipoSolicitud) {
                     switch (solicitud.tipoSolicitud) {
@@ -85,12 +85,12 @@ const RechazarSolicitud: React.FC = () => {
                 } else {
                     throw new Error("Tipo de solicitud no definido.");
                 }
-    
+
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error("Error al obtener la solicitud.");
                 }
-    
+
                 // const data = await response.json();
                 // setSolicitud(data);
             } catch (error: any) {
@@ -164,7 +164,7 @@ const RechazarSolicitud: React.FC = () => {
                     <>
                         {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
                         {solicitud.fechaEnvio && <p><strong>Fecha de Envío:</strong> {formatDateTime(solicitud.fechaEnvio)}</p>}
-                        {solicitud.fechaRecepcionMaxima && <p><strong>Fecha de Recepción Máxima:</strong> {formatDateTime(solicitud.fechaRecepcionMaxima)}</p>}
+                        {solicitud.fechaRecepcion && <p><strong>Fecha de Recepción:</strong> {formatDateTime(solicitud.fechaRecepcion)}</p>}
                     </>
                 );
             case "Servicio Transporte":
@@ -172,18 +172,26 @@ const RechazarSolicitud: React.FC = () => {
                     <>
                         {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
                         {solicitud.fechaTransporte && <p><strong>Fecha de Transporte:</strong> {formatDateTime(solicitud.fechaTransporte)}</p>}
+                        {solicitud.fechaTransporteVuelta && <p><strong>Fecha de Recepción:</strong> {formatDateTime(solicitud.fechaTransporteVuelta)}</p>}
                         {solicitud.origen && <p><strong>Origen:</strong> {solicitud.origen}</p>}
                         {solicitud.destino && <p><strong>Destino:</strong> {solicitud.destino}</p>}
                     </>
                 );
-            case "Uso Inmobiliario":
+            case "Abastecimiento de Combustible":
                 return (
                     <>
-                        {solicitud.sala && <p><strong>Sala:</strong> {solicitud.sala}</p>}
-                        {solicitud.fechaInicio && <p><strong>Fecha de Inicio:</strong> {formatDateTime(solicitud.fechaInicio)}</p>}
-                        {solicitud.fechaFin && <p><strong>Fecha de Fin:</strong> {formatDateTime(solicitud.fechaFin)}</p>}
-                        {solicitud.horarioInicio && <p><strong>Horario de Inicio:</strong> {solicitud.horarioInicio}</p>}
-                        {solicitud.horarioFin && <p><strong>Horario de Fin:</strong> {solicitud.horarioFin}</p>}
+                        {solicitud.fecha && <p><strong>Fecha de Servicio:</strong> {formatDateTime(solicitud.fecha)}</p>}
+                        {solicitud.tipoCombustible && <p><strong>Tipo de Combustible:</strong> {solicitud.tipoCombustible}</p>}
+                        {solicitud.litros && <p><strong>Cantidad de Litros:</strong> {solicitud.litros}</p>}
+                    </>
+                )
+
+            case "Abastecimiento de Combustible":
+                return (
+                    <>
+                        {solicitud.tipoDeCombustible && <p><strong>Tipo de Combustible:</strong> {solicitud.tipoDeCombustible}</p>}
+                        {solicitud.cantidadLitros && <p><strong>Cantidad de Litros:</strong> {solicitud.cantidadLitros}</p>}
+                        {solicitud.fechaSolicitud && <p><strong>Fecha de Solicitud:</strong> {formatDateTime(solicitud.fechaSolicitud)}</p>}
                     </>
                 );
             default:

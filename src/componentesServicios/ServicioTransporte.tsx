@@ -110,7 +110,7 @@ const SolicitudServicioTransporte: React.FC = () => {
     }
 
     // Validación de campos obligatorios
-    if (!areaSolicitante || !origen || !destino || !fechaTransporte) {
+    if (!areaSolicitante || !origen || !destino) {
       setError("El área solicitante, el origen, el destino y la fecha de transporte son obligatorios.");
       return;
     }
@@ -285,35 +285,41 @@ const SolicitudServicioTransporte: React.FC = () => {
           />
         </div>
 
-        <div className="mb-3">
-          <label htmlFor="fechaTransporte" className="form-label">
-            Fecha de Transporte
-          </label>
-          <input
-            type="date"
-            className="form-control"
-            id="fechaTransporte"
-            name="fechaTransporte"
-            value={fechaTransporte}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
+        {/* Campo para Fecha de Envío */}
+        {(tipoServicio === "Llevar" || tipoServicio === "Llevar y Recoger") && (
+          <div className="mb-3">
+            <label htmlFor="fechaTransporte" className="form-label">
+              Fecha de Transporte
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              id="fechaTransporte"
+              name="fechaTransporte"
+              value={fechaTransporte}
+              onChange={manejarCambio}
+              required
+            />
+          </div>
+        )}
 
-        <div className="mb-3">
-          <label htmlFor="fechaTransporteVuelta" className="form-label">
-            Fecha de Transporte de Vuelta
-          </label>
-          <input
-            type="date"
-            className="form-control"
-            id="fechaTransporteVuelta"
-            name="fechaTransporteVuelta"
-            value={fechaTransporteVuelta}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
+        {/* Campo para Fecha de Recepción Máxima */}
+        {(tipoServicio === "Recoger" || tipoServicio === "Llevar y Recoger") && (
+          <div className="mb-3">
+            <label htmlFor="fechaTransporteVuelta" className="form-label">
+              Fecha de Recepción
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              id="fechaTransporteVuelta"
+              name="fechaTransporteVuelta"
+              value={fechaTransporteVuelta}
+              onChange={manejarCambio}
+              required
+            />
+          </div>
+        )}
 
         <div className="mb-3">
           <label htmlFor="descripcion" className="form-label">

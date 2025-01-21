@@ -15,7 +15,7 @@ const SolicitudServicioPostal: React.FC = () => {
   const [estado, setEstado] = useState<string>("Solicitada");
   const [observaciones, setObservaciones] = useState<string>("");
   const [fechaEnvio, setFechaEnvio] = useState<string>("");
-  const [fechaRecepcionMaxima, setFechaRecepcionMaxima] = useState<string>("");
+  const [fechaRecepcion, setfechaRecepcion] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
@@ -90,8 +90,8 @@ const SolicitudServicioPostal: React.FC = () => {
       case "fechaEnvio":
         setFechaEnvio(value);
         break;
-      case "fechaRecepcionMaxima":
-        setFechaRecepcionMaxima(value);
+      case "fechaRecepcion":
+        setfechaRecepcion(value);
         break;
       case "tipoSolicitud": // Manejo de tipoSolicitud
         setTipoSolicitud(value);
@@ -113,13 +113,13 @@ const SolicitudServicioPostal: React.FC = () => {
     }
 
     // Validación de campos obligatorios
-    if (!areaSolicitante || !descripcionServicio || !fechaEnvio || !fechaRecepcionMaxima) {
+    if (!areaSolicitante || !descripcionServicio) {
       setError("El área solicitante, la descripción del servicio, la fecha de envío y la fecha de recepción son obligatorios.");
       return;
     }
 
     try {
-      const url = `https://localhost:7094/api/ServicioPostal/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoDeServicio=${encodeURIComponent(tipoServicio)}&catalogoId=${encodeURIComponent("1")}&fechaEnvio=${encodeURIComponent(fechaEnvio)}&fechaRecepcionMaxima=${encodeURIComponent(fechaRecepcionMaxima)}&descripcionServicio=${encodeURIComponent(descripcionServicio)}&estado=${encodeURIComponent("Solicitada")}&observaciones=${encodeURIComponent(observaciones)}`;
+      const url = `https://localhost:7094/api/ServicioPostal/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoDeServicio=${encodeURIComponent(tipoServicio)}&catalogoId=${encodeURIComponent("1")}&fechaEnvio=${encodeURIComponent(fechaEnvio)}&fechaRecepcion=${encodeURIComponent(fechaRecepcion)}&descripcionServicio=${encodeURIComponent(descripcionServicio)}&estado=${encodeURIComponent("Solicitada")}&observaciones=${encodeURIComponent(observaciones)}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -146,7 +146,7 @@ const SolicitudServicioPostal: React.FC = () => {
       setAreaSolicitante("");
       setDescripcionServicio("");
       setFechaEnvio("");
-      setFechaRecepcionMaxima("");
+      setfechaRecepcion("");
 
       // Esperar 2 segundos y luego navegar a la página principal
       setTimeout(() => {
@@ -259,6 +259,45 @@ const SolicitudServicioPostal: React.FC = () => {
 
 
 
+
+
+        {/* Campo para Fecha de Envío */}
+        {(tipoServicio === "Llevar" || tipoServicio === "Llevar y Recoger") && (
+          <div className="mb-3">
+            <label htmlFor="fechaEnvio" className="form-label">
+              Fecha de Envío
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              id="fechaEnvio"
+              name="fechaEnvio"
+              value={fechaEnvio}
+              onChange={manejarCambio}
+              required
+            />
+          </div>
+        )}
+
+        {/* Campo para Fecha de Recepción Máxima */}
+        {(tipoServicio === "Recoger" || tipoServicio === "Llevar y Recoger") && (
+          <div className="mb-3">
+            <label htmlFor="fechaRecepcion" className="form-label">
+              Fecha de Recepción
+            </label>
+            <input
+              type="date"
+              className="form-control"
+              id="fechaRecepcion"
+              name="fechaRecepcion"
+              value={fechaRecepcion}
+              onChange={manejarCambio}
+              required
+            />
+          </div>
+        )}
+
+
         <div className="mb-3">
           <label htmlFor="descripcionServicio" className="form-label">
             Descripción del Servicio
@@ -268,36 +307,6 @@ const SolicitudServicioPostal: React.FC = () => {
             id="descripcionServicio"
             name="descripcionServicio"
             value={descripcionServicio}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="fechaEnvio" className="form-label">
-            Fecha de Envío
-          </label>
-          <input
-            type="date"
-            className="form-control"
-            id="fechaEnvio"
-            name="fechaEnvio"
-            value={fechaEnvio}
-            onChange={manejarCambio}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label htmlFor="fechaRecepcionMaxima" className="form-label">
-            Fecha de Recepción Máxima
-          </label>
-          <input
-            type="date"
-            className="form-control"
-            id="fechaRecepcionMaxima"
-            name="fechaRecepcionMaxima"
-            value={fechaRecepcionMaxima}
             onChange={manejarCambio}
             required
           />

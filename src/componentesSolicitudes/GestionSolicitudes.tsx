@@ -17,7 +17,7 @@ interface Solicitud {
   fechaInicio?: string;
   fechaEntrega?: string;
   fechaEnvio?: string;
-  fechaRecepcionMaxima?: string;
+  fechaRecepcion?: string;
   fechaTransporte?: string;
   fechaTransporteVuelta?: string;
   fechaFin?: string;
@@ -26,6 +26,9 @@ interface Solicitud {
   sala?: string;
   horarioInicio?: string;
   horarioFin?: string;
+  tipoCombustible?: string;
+  litros?: number;
+  fecha?: string;
 }
 interface Area {
   idArea: number;
@@ -344,13 +347,13 @@ const GestionSolicitudes: React.FC = () => {
           return `
                     <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
                     <p><strong>Fecha de Envío:</strong> ${solicitud.fechaEnvio ? formatDateTime(solicitud.fechaEnvio) : "No especificada"}</p>
-                    <p><strong>Fecha Recepción Máxima:</strong> ${solicitud.fechaRecepcionMaxima ? formatDateTime(solicitud.fechaRecepcionMaxima) : "No especificada"}</p>
+                    <p><strong>Fecha de Recepción:</strong> ${solicitud.fechaRecepcion ? formatDateTime(solicitud.fechaRecepcion) : "No especificada"}</p>
                 `;
         case "Servicio Transporte":
           return `
                     <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoDeServicio || "No especificado"}</p>
                     <p><strong>Fecha Transporte:</strong> ${solicitud.fechaTransporte ? formatDateTime(solicitud.fechaTransporte) : "No especificada"}</p>
-                    <p><strong>Fecha Transporte de Vuelta:</strong> ${solicitud.fechaTransporteVuelta ? formatDateTime(solicitud.fechaTransporteVuelta) : "No especificada"}</p>
+                    <p><strong>Fecha de Recepción:</strong> ${solicitud.fechaTransporteVuelta ? formatDateTime(solicitud.fechaTransporteVuelta) : "No especificada"}</p>
                     <p><strong>Origen:</strong> ${solicitud.origen || "No especificado"}</p>
                     <p><strong>Destino:</strong> ${solicitud.destino || "No especificado"}</p>
                 `;
@@ -360,14 +363,22 @@ const GestionSolicitudes: React.FC = () => {
                     <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
                     <p><strong>Fecha de Entrega:</strong> ${solicitud.fechaEntrega ? formatDateTime(solicitud.fechaEntrega) : "No especificada"}</p>
                 `;
-        case "Uso Inmobiliario":
+        case "Eventos":
           return `
+                    <p><strong>Tipo de Servicio:</strong> ${solicitud.tipoServicio || "No especificado"}</p>
                     <p><strong>Sala:</strong> ${solicitud.sala || "No especificada"}</p>
                     <p><strong>Fecha de Inicio:</strong> ${solicitud.fechaInicio ? formatDateTime(solicitud.fechaInicio) : "No especificada"}</p>
                     <p><strong>Fecha de Fin:</strong> ${solicitud.fechaFin ? formatDateTime(solicitud.fechaFin) : "No especificada"}</p>
                     <p><strong>Horario de Inicio:</strong> ${solicitud.horarioInicio || "No especificado"}</p>
                     <p><strong>Horario de Fin:</strong> ${solicitud.horarioFin || "No especificado"}</p>
                 `;
+        case "Abastecimiento de Combustible":
+          return `
+                    <p><strong> Fecha de Servicio:</strong> ${solicitud.fecha ? formatDateTime(solicitud.fecha) : "No especificada"}</p>
+                    <p><strong>Tipo de Combustible:</strong> ${solicitud.tipoCombustible? (solicitud.tipoCombustible) : "No especificada"}</p>
+                    <p><strong>Cantidad de Litros:</strong> ${solicitud.litros? (solicitud.litros) : "No especificada"}</p>
+                `;
+          
         default:
           return "";
       }

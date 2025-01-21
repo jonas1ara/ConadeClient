@@ -48,7 +48,7 @@ const AprobarSolicitud: React.FC = () => {
     const { state } = useLocation(); // Obtén el estado de la navegación
     const solicitud = state?.solicitud; // Recupera la solicitud desde el estado
 
-    
+
     // const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
     const [areas, setAreas] = useState<Area[]>([]);
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -62,12 +62,12 @@ const AprobarSolicitud: React.FC = () => {
     useEffect(() => {
         const obtenerSolicitud = async () => {
             try {
-    
+
                 let url = "";
 
                 console.log("ID de la solicitud:", id);
                 console.log("Tipo de solicitud:", solicitud?.tipoSolicitud);
-    
+
                 // Comprobar el tipo de solicitud y construir la URL correspondiente
                 if (solicitud?.tipoSolicitud) {
                     switch (solicitud.tipoSolicitud) {
@@ -80,10 +80,10 @@ const AprobarSolicitud: React.FC = () => {
                         case "Servicio Transporte":
                             url = `https://localhost:7094/api/ServicioTransporte/ObtenerPorId/${id}`;
                             break;
-                        case "Evento":
+                        case "Eventos":
                             url = `https://localhost:7094/api/Evento/ObtenerPorId/${id}`;
                             break;
-                        case "Combustible":
+                        case "Abastecimiento de Combustible":
                             url = `https://localhost:7094/api/Combustible/ObtenerPorId/${id}`;
                             break;
                         default:
@@ -92,12 +92,12 @@ const AprobarSolicitud: React.FC = () => {
                 } else {
                     throw new Error("Tipo de solicitud no definido.");
                 }
-    
+
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error("Error al obtener la solicitud.");
                 }
-    
+
                 // const data = await response.json();
                 // setSolicitud(data);
             } catch (error: any) {
@@ -171,7 +171,7 @@ const AprobarSolicitud: React.FC = () => {
                     <>
                         {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
                         {solicitud.fechaEnvio && <p><strong>Fecha de Envío:</strong> {formatDateTime(solicitud.fechaEnvio)}</p>}
-                        {solicitud.fechaRecepcion && <p><strong>Fecha de Recepción Máxima:</strong> {formatDateTime(solicitud.fechaRecepcion)}</p>}
+                        {solicitud.fechaRecepcion && <p><strong>Fecha de Recepción:</strong> {formatDateTime(solicitud.fechaRecepcion)}</p>}
                     </>
                 );
             case "Servicio Transporte":
@@ -179,13 +179,15 @@ const AprobarSolicitud: React.FC = () => {
                     <>
                         {solicitud.tipoDeServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoDeServicio}</p>}
                         {solicitud.fechaTransporte && <p><strong>Fecha de Transporte:</strong> {formatDateTime(solicitud.fechaTransporte)}</p>}
+                        {solicitud.fechaTransporteVuelta && <p><strong>Fecha de Recepción:</strong> {formatDateTime(solicitud.fechaTransporteVuelta)}</p>}
                         {solicitud.origen && <p><strong>Origen:</strong> {solicitud.origen}</p>}
                         {solicitud.destino && <p><strong>Destino:</strong> {solicitud.destino}</p>}
                     </>
                 );
-            case "Evento":
+            case "Eventos":
                 return (
                     <>
+                        {solicitud.tipoServicio && <p><strong>Tipo de Servicio:</strong> {solicitud.tipoServicio}</p>}
                         {solicitud.sala && <p><strong>Sala:</strong> {solicitud.sala}</p>}
                         {solicitud.fechaInicio && <p><strong>Fecha de Inicio:</strong> {formatDateTime(solicitud.fechaInicio)}</p>}
                         {solicitud.fechaFin && <p><strong>Fecha de Fin:</strong> {formatDateTime(solicitud.fechaFin)}</p>}
@@ -193,8 +195,16 @@ const AprobarSolicitud: React.FC = () => {
                         {solicitud.horarioFin && <p><strong>Horario de Fin:</strong> {solicitud.horarioFin}</p>}
                     </>
                 );
+            case "Abastecimiento de Combustible":
+                return (
+                    <>
+                        {solicitud.fecha && <p><strong>Fecha de Servicio:</strong> {formatDateTime(solicitud.fecha)}</p>}
+                        {solicitud.tipoCombustible && <p><strong>Tipo de Combustible:</strong> {solicitud.tipoCombustible}</p>}
+                        {solicitud.litros && <p><strong>Cantidad de Litros:</strong> {solicitud.litros}</p>}
+                    </>
+                )
 
-            case "Combustible":
+            case "Abastecimiento de Combustible":
                 return (
                     <>
                         {solicitud.tipoDeCombustible && <p><strong>Tipo de Combustible:</strong> {solicitud.tipoDeCombustible}</p>}
