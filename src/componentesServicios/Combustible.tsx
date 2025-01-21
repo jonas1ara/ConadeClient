@@ -8,11 +8,13 @@ const SolicitudCombustible: React.FC = () => {
   const [fechaSolicitud, setFechaSolicitud] = useState<string>(new Date().toISOString().split("T")[0]);
   const [areaSolicitante, setAreaSolicitante] = useState<string>("");
   const [usuarioSolicitanteID, setUsuarioSolicitanteID] = useState<number | null>(null);
-  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Combustible");
+  const [tipoSolicitud, setTipoSolicitud] = useState<string>("Abastecimiento de Combustible");
   const [tipoCombustible, setTipoCombustible] = useState<string>("");
   const [cantidadSolicitada, setCantidadSolicitada] = useState<number>(0);
   const [descripcion, setDescripcion] = useState<string>("");
   const [estado, setEstado] = useState<string>("Solicitada");
+  const [observaciones, setObservaciones] = useState<string>("");
+
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [areasCatalogo, setAreasCatalogo] = useState<any[]>([]);
@@ -62,6 +64,9 @@ const SolicitudCombustible: React.FC = () => {
       case "areaSolicitante":
         setAreaSolicitante(value);
         break;
+      case "tipoSolicitud":
+        setTipoSolicitud(value);
+        break;
       case "tipoCombustible":
         setTipoCombustible(value);
         break;
@@ -73,6 +78,9 @@ const SolicitudCombustible: React.FC = () => {
         break;
       case "estado":
         setEstado(value);
+        break;
+      case "observaciones":
+        setObservaciones(value);
         break;
       default:
         break;
@@ -95,7 +103,7 @@ const SolicitudCombustible: React.FC = () => {
     }
 
     try {
-      const url = `https://localhost:7094/api/Combustible/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSerie)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&tipoCombustible=${encodeURIComponent(tipoCombustible)}&cantidadSolicitada=${encodeURIComponent(cantidadSolicitada)}&descripcion=${encodeURIComponent(descripcion)}&estado=${encodeURIComponent(estado)}`;
+      const url = `https://localhost:7094/api/Combustible/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSerie)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${encodeURIComponent(usuarioSolicitanteID)}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&catalogoId=${encodeURIComponent("1")}&descripcionServicio=${encodeURIComponent(descripcion)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -121,12 +129,16 @@ const SolicitudCombustible: React.FC = () => {
       setNumeroDeSerie("");
       setFechaSolicitud("");
       setAreaSolicitante("");
+      setTipoSolicitud("");
       setTipoCombustible("");
       setCantidadSolicitada(0);
       setDescripcion("");
       setEstado("Solicitada");
 
-      navigate("/panel-principal");
+      // Esperar 2 segundos y luego navegar a la página principal
+      setTimeout(() => {
+        navigate("/panel-principal");
+      }, 2000); // 2000 milisegundos (2 segundos)
 
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
@@ -205,7 +217,7 @@ const SolicitudCombustible: React.FC = () => {
             className="form-control"
             id="tipoSolicitud"
             name="tipoSolicitud"
-            value="Combustible"
+            value="Abastecimiento de Combustible"
             disabled
             readOnly
           />

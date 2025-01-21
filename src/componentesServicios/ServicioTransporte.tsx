@@ -137,7 +137,7 @@ const SolicitudServicioTransporte: React.FC = () => {
         }
         return;
       }
-      
+
       setSuccessMessage("Solicitud enviada exitosamente.");
       setNumeroDeSolicitud("");
       setAreaSolicitante("");
@@ -148,7 +148,10 @@ const SolicitudServicioTransporte: React.FC = () => {
       setDescripcion("");
       setObservaciones("");
 
-      navigate("/panel-principal");
+      // Esperar 2 segundos y luego navegar a la página principal
+      setTimeout(() => {
+        navigate("/panel-principal");
+      }, 2000); // 2000 milisegundos (2 segundos)
 
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");

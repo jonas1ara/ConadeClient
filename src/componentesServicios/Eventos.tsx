@@ -119,7 +119,7 @@ const SolicitudEventos: React.FC = () => {
     }
 
     try {
-      const url = `https://localhost:7094/api/UsoInmobiliario/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&sala=${encodeURIComponent(sala)}&catalogoId=${encodeURIComponent("1")}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}&horarioInicio=${encodeURIComponent(horarioInicio)}&horarioFin=${encodeURIComponent(horarioFin)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
+      const url = `https://localhost:7094/api/Evento/Crear?numeroDeSerie=${encodeURIComponent(numeroDeSolicitud)}&areaSolicitante=${encodeURIComponent(areaSolicitante)}&usuarioSolicitante=${usuarioSolicitanteID}&tipoSolicitud=${encodeURIComponent(tipoSolicitud)}&sala=${encodeURIComponent(sala)}&catalogoId=${encodeURIComponent("1")}&fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}&horarioInicio=${encodeURIComponent(horarioInicio)}&horarioFin=${encodeURIComponent(horarioFin)}&estado=${encodeURIComponent(estado)}&observaciones=${encodeURIComponent(observaciones)}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -151,7 +151,10 @@ const SolicitudEventos: React.FC = () => {
       setDescripcion("");
       setObservaciones("");
 
-      navigate("/panel-principal");
+      // Esperar 2 segundos y luego navegar a la página principal
+      setTimeout(() => {
+        navigate("/panel-principal");
+      }, 2000); // 2000 milisegundos (2 segundos)
 
     } catch (error: any) {
       setError(error.message || "Error al enviar la solicitud.");
