@@ -76,7 +76,7 @@ const RechazarSolicitud: React.FC = () => {
                         case "Evento":
                             url = `https://localhost:7094/api/Evento/ObtenerPorId/${id}`;
                             break;
-                        case "Combustible":
+                        case "Abastecimiento de Combustible":
                             url = `https://localhost:7094/api/Combustible/ObtenerPorId/${id}`;
                             break;
                         default:
@@ -186,14 +186,6 @@ const RechazarSolicitud: React.FC = () => {
                     </>
                 )
 
-            case "Abastecimiento de Combustible":
-                return (
-                    <>
-                        {solicitud.tipoDeCombustible && <p><strong>Tipo de Combustible:</strong> {solicitud.tipoDeCombustible}</p>}
-                        {solicitud.cantidadLitros && <p><strong>Cantidad de Litros:</strong> {solicitud.cantidadLitros}</p>}
-                        {solicitud.fechaSolicitud && <p><strong>Fecha de Solicitud:</strong> {formatDateTime(solicitud.fechaSolicitud)}</p>}
-                    </>
-                );
             default:
                 return null;
         }
